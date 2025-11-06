@@ -92,72 +92,176 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
   };
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black bg-opacity-90 flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl">
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 60,
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px'
+    }}>
+      <div style={{ width: '100%', maxWidth: '1024px' }}>
         {/* Video Container */}
-        <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+        <div style={{
+          position: 'relative',
+          backgroundColor: '#000000',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          aspectRatio: '16/9'
+        }}>
           <YouTube
             videoId={video.youtube_video_id}
             opts={opts}
             onReady={onPlayerReady}
             onEnd={onPlayerEnd}
-            className="absolute inset-0 w-full h-full"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%'
+            }}
           />
         </div>
 
         {/* Controls */}
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div className="flex-1 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">{getCountryFlag(video.country_code)}</span>
-              <span className="font-semibold">{getCountryName(video.country_code)}</span>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-300">{CATEGORY_LABELS[category]}</span>
+        <div style={{
+          marginTop: '16px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: '16px'
+        }}>
+          <div style={{ flex: 1, color: '#ffffff' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '8px'
+            }}>
+              <span style={{ fontSize: '24px' }}>{getCountryFlag(video.country_code)}</span>
+              <span style={{ fontWeight: '600' }}>{getCountryName(video.country_code)}</span>
+              <span style={{ color: '#9ca3af' }}>•</span>
+              <span style={{ color: '#d1d5db' }}>{CATEGORY_LABELS[category]}</span>
             </div>
             {video.title && (
-              <p className="text-sm text-gray-300">{video.title}</p>
+              <p style={{ fontSize: '14px', color: '#d1d5db' }}>{video.title}</p>
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
             {/* Flag Button */}
-            <div className="relative">
+            <div style={{ position: 'relative' }}>
               {!flagged ? (
                 <>
                   <button
                     onClick={() => setShowFlagButton(!showFlagButton)}
-                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#374151',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      border: 'none',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
                   >
                     Report Issue
                   </button>
 
                   {showFlagButton && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl overflow-hidden z-10">
+                    <div style={{
+                      position: 'absolute',
+                      right: 0,
+                      marginTop: '8px',
+                      width: '224px',
+                      backgroundColor: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                      overflow: 'hidden',
+                      zIndex: 10
+                    }}>
                       <button
                         onClick={() => handleFlag('broken')}
                         disabled={flagging}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 transition-colors text-gray-900"
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          fontSize: '14px',
+                          border: 'none',
+                          backgroundColor: '#ffffff',
+                          color: '#111827',
+                          cursor: flagging ? 'not-allowed' : 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                       >
                         Video is broken
                       </button>
                       <button
                         onClick={() => handleFlag('wrong_category')}
                         disabled={flagging}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 transition-colors text-gray-900"
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          fontSize: '14px',
+                          border: 'none',
+                          backgroundColor: '#ffffff',
+                          color: '#111827',
+                          cursor: flagging ? 'not-allowed' : 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                       >
                         Wrong category
                       </button>
                       <button
                         onClick={() => handleFlag('inappropriate')}
                         disabled={flagging}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 transition-colors text-gray-900"
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          fontSize: '14px',
+                          border: 'none',
+                          backgroundColor: '#ffffff',
+                          color: '#111827',
+                          cursor: flagging ? 'not-allowed' : 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                       >
                         Inappropriate
                       </button>
                       <button
                         onClick={() => handleFlag('other')}
                         disabled={flagging}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 transition-colors text-gray-900"
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          fontSize: '14px',
+                          border: 'none',
+                          backgroundColor: '#ffffff',
+                          color: '#111827',
+                          cursor: flagging ? 'not-allowed' : 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                       >
                         Other issue
                       </button>
@@ -165,14 +269,29 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
                   )}
                 </>
               ) : (
-                <span className="px-4 py-2 text-sm text-gray-400">Reported</span>
+                <span style={{
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  color: '#9ca3af'
+                }}>Reported</span>
               )}
             </div>
 
             {/* Next Button */}
             <button
               onClick={onNext}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              style={{
+                padding: '8px 24px',
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             >
               Next
             </button>
@@ -180,12 +299,25 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#374151',
+                color: '#ffffff',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
               aria-label="Close"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
+                style={{ height: '20px', width: '20px' }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
