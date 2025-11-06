@@ -84,16 +84,14 @@ export default function Home() {
   }
 
   function handleSubmitClick() {
-    if (!user) {
-      setShowAuthModal(true);
-    } else {
-      setShowSubmissionForm(true);
-    }
+    // Allow submissions without login
+    setShowSubmissionForm(true);
   }
 
   function handleAuthSuccess() {
     setShowAuthModal(false);
-    setShowSubmissionForm(true);
+    // Keep submission form open if it was already open
+    // User can now click submit again after logging in
   }
 
   function handleSubmissionSuccess() {
@@ -163,6 +161,7 @@ export default function Home() {
           countryCode={selectedCountry}
           onClose={() => setShowSubmissionForm(false)}
           onSuccess={handleSubmissionSuccess}
+          onAuthRequired={() => setShowAuthModal(true)}
         />
       )}
     </div>
