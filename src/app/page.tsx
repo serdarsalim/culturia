@@ -17,6 +17,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: '', description: '' });
   const [categoryCounts, setCategoryCounts] = useState<Record<VideoCategory, number>>({
     inspiration: 0,
     music: 0,
@@ -123,7 +124,13 @@ export default function Home() {
         const randomVideo = data[Math.floor(Math.random() * data.length)];
         setCurrentVideo({ video: randomVideo, category: currentVideo.category });
       } else {
-        alert('No more videos available in this category');
+        // Show toast instead of alert
+        setToastMessage({
+          title: 'No More Videos',
+          description: 'No more videos available in this category for this country'
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       }
     } catch (error) {
       console.error('Error fetching next video:', error);
@@ -152,7 +159,13 @@ export default function Home() {
         // Close country sidebar if open
         setSelectedCountry(null);
       } else {
-        alert('No videos available in this category yet');
+        // Show toast instead of alert
+        setToastMessage({
+          title: 'No Videos Available',
+          description: 'No videos have been approved in this category yet'
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       }
     } catch (error) {
       console.error('Error fetching random video:', error);
@@ -172,6 +185,10 @@ export default function Home() {
 
   function handleSubmissionSuccess() {
     setShowSubmissionForm(false);
+    setToastMessage({
+      title: 'Submitted for Review',
+      description: 'Your submission will be reviewed by our team'
+    });
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -500,7 +517,7 @@ export default function Home() {
           bottom: '32px',
           right: '32px',
           zIndex: 100,
-          backgroundColor: '#10b981',
+          backgroundColor: toastMessage.title === 'No More Videos' || toastMessage.title === 'No Videos Available' ? '#ef4444' : '#10b981',
           color: '#ffffff',
           padding: '16px 24px',
           borderRadius: '12px',
@@ -512,11 +529,13 @@ export default function Home() {
           fontWeight: '500',
           animation: 'slideIn 0.3s ease-out'
         }}>
-          <span style={{ fontSize: '20px' }}>✓</span>
+          <span style={{ fontSize: '20px' }}>
+            {toastMessage.title === 'No More Videos' || toastMessage.title === 'No Videos Available' ? '⚠️' : '✓'}
+          </span>
           <div>
-            <div style={{ fontWeight: '600' }}>Submitted for Review</div>
+            <div style={{ fontWeight: '600' }}>{toastMessage.title}</div>
             <div style={{ fontSize: '13px', opacity: 0.9, marginTop: '2px' }}>
-              Your submission will be reviewed by our team
+              {toastMessage.description}
             </div>
           </div>
         </div>
