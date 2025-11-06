@@ -103,31 +103,6 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 px-6 py-3 flex items-center justify-between z-10 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-white text-xl font-bold">C</span>
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            CULTURIA
-          </h1>
-        </div>
-
-        {/* Only show user info when logged in, hide sign in button */}
-        {user && (
-          <nav className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{user.email}</span>
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Sign Out
-            </button>
-          </nav>
-        )}
-      </header>
-
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar - on left */}
@@ -190,15 +165,6 @@ export default function Home() {
           onSuccess={handleSubmissionSuccess}
         />
       )}
-
-      {/* Footer */}
-      <footer className="bg-white/90 backdrop-blur-sm border-t border-gray-200 px-6 py-2 text-center text-xs text-gray-600 z-10">
-        <p>
-          © {new Date().getFullYear()} CULTURIA • Discover authentic cultural content
-          {' • '}
-          <a href="/terms" className="text-blue-600 hover:text-blue-700 transition-colors">Terms</a>
-        </p>
-      </footer>
     </div>
   );
 }
