@@ -37,7 +37,8 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
 
   return (
     <div
-      className="relative w-full h-full bg-gradient-to-br from-blue-300 via-blue-400 to-blue-500"
+      className="relative w-full h-full"
+      style={{ backgroundColor: '#60a5fa' }} // Solid blue ocean color
       onClick={(e) => {
         // Close sidebar when clicking on background (not on a country)
         if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'svg') {
@@ -80,35 +81,9 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
                 // Match country by name from GeoJSON properties
                 const geoName = geo.properties?.name || '';
 
-                // Exclude Antarctica (no permanent residents)
+                // Completely hide Antarctica (no permanent residents)
                 if (geoName === 'Antarctica') {
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      geography={geo}
-                      style={{
-                        default: {
-                          fill: '#f3f4f6',
-                          stroke: '#d1d5db',
-                          strokeWidth: 0.75,
-                          outline: 'none',
-                        },
-                        hover: {
-                          fill: '#f3f4f6',
-                          stroke: '#d1d5db',
-                          strokeWidth: 0.75,
-                          outline: 'none',
-                          cursor: 'default',
-                        },
-                        pressed: {
-                          fill: '#f3f4f6',
-                          stroke: '#d1d5db',
-                          strokeWidth: 0.75,
-                          outline: 'none',
-                        },
-                      }}
-                    />
-                  );
+                  return null;
                 }
 
                 const country = countries.find(c =>
