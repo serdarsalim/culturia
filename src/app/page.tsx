@@ -100,47 +100,44 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Main Content */}
+      {/* Map Container - full screen */}
       <div className="flex-1 relative overflow-hidden">
-        {/* Map Container - full width */}
-        <div className="w-full h-full">
-          <WorldMap
-            onCountryClick={handleCountryClick}
-            selectedCountry={selectedCountry}
-            onBackgroundClick={handleCloseSidebar}
-          />
-        </div>
+        <WorldMap
+          onCountryClick={handleCountryClick}
+          selectedCountry={selectedCountry}
+          onBackgroundClick={handleCloseSidebar}
+        />
+      </div>
 
-        {/* Sidebar - always visible */}
-        <div className="fixed left-0 top-0 bottom-0 w-80 shadow-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-50">
-          {selectedCountry ? (
-            <CountrySidebar
-              countryCode={selectedCountry}
-              onClose={handleCloseSidebar}
-              onVideoSelect={handleVideoSelect}
-              onSubmitClick={handleSubmitClick}
-            />
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                🌍 CULTURIA
-              </h1>
-              <p className="text-slate-300 text-lg mb-6">
-                Discover authentic cultural content from around the world
-              </p>
-              <div className="text-slate-400 text-sm space-y-3">
-                <p>👆 Click on any country to explore:</p>
-                <ul className="text-left space-y-2">
-                  <li>💡 Inspiration</li>
-                  <li>🎵 Music</li>
-                  <li>😄 Comedy</li>
-                  <li>🍳 Cooking</li>
-                  <li>🎤 Street Voices</li>
-                </ul>
-              </div>
+      {/* Sidebar - always visible, on top of map */}
+      <div className="fixed left-0 top-0 bottom-0 w-80 shadow-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-[100]">
+        {selectedCountry ? (
+          <CountrySidebar
+            countryCode={selectedCountry}
+            onClose={handleCloseSidebar}
+            onVideoSelect={handleVideoSelect}
+            onSubmitClick={handleSubmitClick}
+          />
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">
+              🌍 CULTURIA
+            </h1>
+            <p className="text-slate-300 text-lg mb-6">
+              Discover authentic cultural content from around the world
+            </p>
+            <div className="text-slate-400 text-sm space-y-3">
+              <p>👆 Click on any country to explore:</p>
+              <ul className="text-left space-y-2">
+                <li>💡 Inspiration</li>
+                <li>🎵 Music</li>
+                <li>😄 Comedy</li>
+                <li>🍳 Cooking</li>
+                <li>🎤 Street Voices</li>
+              </ul>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Video Player Overlay */}
