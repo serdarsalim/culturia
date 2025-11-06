@@ -92,7 +92,7 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] bg-black bg-opacity-90 flex items-center justify-center p-4">
       <div className="w-full max-w-5xl">
         {/* Video Container */}
         <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>

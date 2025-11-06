@@ -10,9 +10,10 @@ interface SubmissionFormProps {
   countryCode: string;
   onClose: () => void;
   onSuccess: () => void;
+  onAuthRequired?: () => void;
 }
 
-export default function SubmissionForm({ countryCode, onClose, onSuccess }: SubmissionFormProps) {
+export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuthRequired }: SubmissionFormProps) {
   const [category, setCategory] = useState<VideoCategory>('inspiration');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -72,7 +73,9 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess }: Subm
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError('You must be logged in to submit videos');
+        setLoading(false);
+        // Trigger auth modal instead of showing error
+        onAuthRequired?.();
         return;
       }
 
@@ -133,7 +136,7 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess }: Subm
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8 relative">
         {/* Close Button */}
         <button
