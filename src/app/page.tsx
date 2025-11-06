@@ -99,18 +99,9 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Map Container - full screen */}
-      <div className="flex-1 relative overflow-hidden">
-        <WorldMap
-          onCountryClick={handleCountryClick}
-          selectedCountry={selectedCountry}
-          onBackgroundClick={handleCloseSidebar}
-        />
-      </div>
-
-      {/* Sidebar - always visible, on top of map */}
-      <div className="fixed left-0 top-0 bottom-0 w-80 shadow-2xl bg-gradient-to-b from-zinc-900 via-zinc-800 to-zinc-900 border-r-2 border-amber-500 z-[100]">
+    <div className="h-screen flex overflow-hidden">
+      {/* Sidebar - always visible on the left */}
+      <div className="w-80 h-full shadow-2xl flex-shrink-0 overflow-y-auto" style={{ backgroundColor: '#f3f4f6', color: '#000000' }}>
         {selectedCountry ? (
           <CountrySidebar
             countryCode={selectedCountry}
@@ -119,25 +110,63 @@ export default function Home() {
             onSubmitClick={handleSubmitClick}
           />
         ) : (
-          <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-4">
+          <div className="h-full flex flex-col justify-center" style={{ padding: '48px 32px' }}>
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: '600',
+              color: '#000000',
+              marginBottom: '12px',
+              letterSpacing: '-0.02em'
+            }}>
               🌍 CULTURIA
             </h1>
-            <p className="text-slate-200 text-lg mb-6 font-medium">
+            <p style={{
+              fontSize: '15px',
+              color: '#4b5563',
+              marginBottom: '32px',
+              lineHeight: '1.6',
+              maxWidth: '100%'
+            }}>
               Discover authentic cultural content from around the world
             </p>
-            <div className="text-slate-300 space-y-4 mt-4">
-              <p className="text-amber-400 font-semibold">👆 Click on any country to explore:</p>
-              <ul className="text-left space-y-2 bg-zinc-800/50 p-4 rounded-lg">
-                <li className="flex items-center gap-2"><span className="text-2xl">💡</span> Inspiration</li>
-                <li className="flex items-center gap-2"><span className="text-2xl">🎵</span> Music</li>
-                <li className="flex items-center gap-2"><span className="text-2xl">😄</span> Comedy</li>
-                <li className="flex items-center gap-2"><span className="text-2xl">🍳</span> Cooking</li>
-                <li className="flex items-center gap-2"><span className="text-2xl">🎤</span> Street Voices</li>
-              </ul>
+            <div>
+              <p style={{
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#6b7280',
+                marginBottom: '16px'
+              }}>
+                Click on any country to explore
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#000000' }}>
+                  <span style={{ fontSize: '20px' }}>💡</span> Inspiration
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#000000' }}>
+                  <span style={{ fontSize: '20px' }}>🎵</span> Music
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#000000' }}>
+                  <span style={{ fontSize: '20px' }}>😄</span> Comedy
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#000000' }}>
+                  <span style={{ fontSize: '20px' }}>🍳</span> Cooking
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#000000' }}>
+                  <span style={{ fontSize: '20px' }}>🎤</span> Street Voices
+                </div>
+              </div>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Map Container - takes remaining space */}
+      <div className="flex-1 relative overflow-hidden bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900">
+        <WorldMap
+          onCountryClick={handleCountryClick}
+          selectedCountry={selectedCountry}
+          onBackgroundClick={handleCloseSidebar}
+        />
       </div>
 
       {/* Video Player Overlay */}

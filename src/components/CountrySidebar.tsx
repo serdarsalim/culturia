@@ -145,28 +145,58 @@ export default function CountrySidebar({
   console.log('CountrySidebar rendering for:', country.name);
 
   return (
-    <div className="h-full flex flex-col">
+    <div style={{
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#f3f4f6',
+      color: '#000000'
+    }}>
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b-2 border-amber-500">
-        <div className="flex items-center gap-3">
-          <span className="text-5xl drop-shadow-lg">{country.flag}</span>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '24px 32px',
+        borderBottom: '1px solid #d1d5db',
+        backgroundColor: '#f3f4f6'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '36px' }}>{country.flag}</span>
           <div>
-            <h2 className="text-2xl font-bold text-white drop-shadow-md">
+            <h2 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#000000',
+              letterSpacing: '-0.01em',
+              marginBottom: '4px'
+            }}>
               {country.name}
             </h2>
-            <p className="text-sm text-slate-300">
+            <p style={{
+              fontSize: '12px',
+              color: '#6b7280'
+            }}>
               {country.languages.slice(0, 2).join(', ')}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-amber-400 transition-colors p-2 hover:bg-zinc-700 rounded-lg"
+          style={{
+            color: '#9ca3af',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '50%',
+            border: 'none',
+            backgroundColor: 'transparent',
+            transition: 'all 0.2s'
+          }}
           aria-label="Close"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            style={{ width: '20px', height: '20px' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -177,8 +207,13 @@ export default function CountrySidebar({
       </div>
 
       {/* Categories */}
-      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-        <div className="space-y-3">
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '24px 32px',
+        backgroundColor: '#f3f4f6'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
             const count = videoCounts[category];
             const hasVideos = count > 0;
@@ -189,27 +224,45 @@ export default function CountrySidebar({
                 key={category}
                 onClick={() => hasVideos && handleCategoryClick(category)}
                 disabled={!hasVideos || loading}
-                className={`w-full text-left p-5 rounded-xl border-2 transition-all transform hover:scale-105 shadow-lg ${
-                  hasVideos
-                    ? `bg-gradient-to-br ${colors.bg} ${colors.border} ${colors.hoverBg} ${colors.hoverBorder} cursor-pointer hover:shadow-xl`
-                    : 'border-zinc-600 bg-zinc-700/50 cursor-not-allowed opacity-50'
-                }`}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '14px 16px',
+                  borderRadius: '8px',
+                  border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
+                  backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
+                  cursor: hasVideos ? 'pointer' : 'not-allowed',
+                  opacity: hasVideos ? 1 : 0.5,
+                  transition: 'all 0.2s'
+                }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{colors.icon}</span>
-                    <span className={`font-semibold ${hasVideos ? colors.text : 'text-slate-500'}`}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '22px' }}>{colors.icon}</span>
+                    <span style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#000000'
+                    }}>
                       {label}
                     </span>
                   </div>
                   {loading ? (
-                    <span className="text-sm text-slate-400">Loading...</span>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>Loading...</span>
                   ) : hasVideos ? (
-                    <span className={`text-sm font-semibold ${colors.text}`}>
-                      {count} video{count !== 1 ? 's' : ''}
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#6b7280'
+                    }}>
+                      {count}
                     </span>
                   ) : (
-                    <span className="text-sm text-slate-500">No videos yet</span>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>0</span>
                   )}
                 </div>
               </button>
@@ -220,13 +273,31 @@ export default function CountrySidebar({
         {/* Submit Button */}
         <button
           onClick={onSubmitClick}
-          className="w-full mt-6 px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl"
+          style={{
+            width: '100%',
+            marginTop: '24px',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '500',
+            borderRadius: '8px',
+            backgroundColor: '#f97316',
+            color: '#ffffff',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
-          ✨ Submit Videos
+          Submit Videos
         </button>
 
         {/* Info Text */}
-        <p className="mt-4 text-sm text-slate-400 text-center">
+        <p style={{
+          marginTop: '12px',
+          fontSize: '12px',
+          textAlign: 'center',
+          color: '#6b7280',
+          lineHeight: '1.5'
+        }}>
           Help build our cultural library by submitting videos
         </p>
       </div>
