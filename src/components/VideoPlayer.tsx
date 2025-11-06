@@ -14,9 +14,13 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ video, category, onClose, onNext }: VideoPlayerProps) {
-  const [showFlagButton, setShowFlagButton] = useState(false);
+  const [showFlagModal, setShowFlagModal] = useState(false);
   const [flagging, setFlagging] = useState(false);
   const [flagged, setFlagged] = useState(false);
+  const [flagReason, setFlagReason] = useState<'broken' | 'wrong_category' | 'inappropriate' | 'other'>('broken');
+  const [flagNote, setFlagNote] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: '', description: '', type: 'success' as 'success' | 'error' });
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   // Check if user has already flagged this video
@@ -38,10 +42,16 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
     checkFlagged();
   }, [video.id]);
 
-  async function handleFlag(reason: 'broken' | 'wrong_category' | 'inappropriate' | 'other') {
+  async function handleFlagSubmit() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      alert('Please log in to flag videos');
+      setToastMessage({
+        title: 'Login Required',
+        description: 'Please log in to report videos',
+        type: 'error'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
       return;
     }
 
@@ -50,23 +60,40 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
       const { error } = await supabase.from('video_flags').insert({
         submission_id: video.id,
         user_id: user.id,
-        reason,
+        reason: flagReason,
+        note: flagNote || null,
       });
 
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
-          alert('You have already flagged this video');
+          setToastMessage({
+            title: 'Already Reported',
+            description: 'You have already reported this video',
+            type: 'error'
+          });
         } else {
           throw error;
         }
       } else {
         setFlagged(true);
-        setShowFlagButton(false);
-        alert('Thank you for reporting this video. Our team will review it.');
+        setShowFlagModal(false);
+        setToastMessage({
+          title: 'Report Submitted',
+          description: 'Thank you for reporting. Our team will review it.',
+          type: 'success'
+        });
       }
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error flagging video:', error);
-      alert('Failed to flag video. Please try again.');
+      setToastMessage({
+        title: 'Failed to Report',
+        description: 'Please try again later',
+        type: 'error'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } finally {
       setFlagging(false);
     }
@@ -156,126 +183,31 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
             gap: '12px'
           }}>
             {/* Flag Button */}
-            <div style={{ position: 'relative' }}>
-              {!flagged ? (
-                <>
-                  <button
-                    onClick={() => setShowFlagButton(!showFlagButton)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#374151',
-                      color: '#ffffff',
-                      borderRadius: '8px',
-                      border: 'none',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
-                  >
-                    Report Issue
-                  </button>
-
-                  {showFlagButton && (
-                    <div style={{
-                      position: 'absolute',
-                      right: 0,
-                      marginTop: '8px',
-                      width: '224px',
-                      backgroundColor: '#ffffff',
-                      borderRadius: '8px',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                      overflow: 'hidden',
-                      zIndex: 10
-                    }}>
-                      <button
-                        onClick={() => handleFlag('broken')}
-                        disabled={flagging}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          textAlign: 'left',
-                          fontSize: '14px',
-                          border: 'none',
-                          backgroundColor: '#ffffff',
-                          color: '#111827',
-                          cursor: flagging ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                      >
-                        Video is broken
-                      </button>
-                      <button
-                        onClick={() => handleFlag('wrong_category')}
-                        disabled={flagging}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          textAlign: 'left',
-                          fontSize: '14px',
-                          border: 'none',
-                          backgroundColor: '#ffffff',
-                          color: '#111827',
-                          cursor: flagging ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                      >
-                        Wrong category
-                      </button>
-                      <button
-                        onClick={() => handleFlag('inappropriate')}
-                        disabled={flagging}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          textAlign: 'left',
-                          fontSize: '14px',
-                          border: 'none',
-                          backgroundColor: '#ffffff',
-                          color: '#111827',
-                          cursor: flagging ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                      >
-                        Inappropriate
-                      </button>
-                      <button
-                        onClick={() => handleFlag('other')}
-                        disabled={flagging}
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          textAlign: 'left',
-                          fontSize: '14px',
-                          border: 'none',
-                          backgroundColor: '#ffffff',
-                          color: '#111827',
-                          cursor: flagging ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => !flagging && (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                      >
-                        Other issue
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <span style={{
+            {!flagged ? (
+              <button
+                onClick={() => setShowFlagModal(true)}
+                style={{
                   padding: '8px 16px',
+                  backgroundColor: '#374151',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  border: 'none',
                   fontSize: '14px',
-                  color: '#9ca3af'
-                }}>Reported</span>
-              )}
-            </div>
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              >
+                Report Issue
+              </button>
+            ) : (
+              <span style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                color: '#9ca3af'
+              }}>Reported</span>
+            )}
 
             {/* Next Button */}
             <button
@@ -328,6 +260,196 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showFlagModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 70,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px'
+        }} onClick={() => setShowFlagModal(false)}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '500px',
+            width: '100%',
+            padding: '32px',
+            position: 'relative',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          }} onClick={(e) => e.stopPropagation()}>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowFlagModal(false)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6b7280',
+                cursor: 'pointer',
+                border: 'none',
+                backgroundColor: '#f3f4f6',
+                borderRadius: '50%',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#e5e7eb';
+                e.currentTarget.style.color = '#000000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              ✕
+            </button>
+
+            <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '8px' }}>
+              Report Video
+            </h2>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
+              Help us maintain quality by reporting issues
+            </p>
+
+            {/* Reason Dropdown */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                Issue Type
+              </label>
+              <select
+                value={flagReason}
+                onChange={(e) => setFlagReason(e.target.value as any)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  fontSize: '14px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              >
+                <option value="broken">Video is broken</option>
+                <option value="wrong_category">Wrong category</option>
+                <option value="inappropriate">Inappropriate content</option>
+                <option value="other">Other issue</option>
+              </select>
+            </div>
+
+            {/* Note Textarea */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                Additional Notes (Optional)
+              </label>
+              <textarea
+                value={flagNote}
+                onChange={(e) => setFlagNote(e.target.value)}
+                placeholder="Describe the issue..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  fontSize: '14px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  resize: 'vertical',
+                  outline: 'none',
+                  fontFamily: 'inherit'
+                }}
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                onClick={() => setShowFlagModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  backgroundColor: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFlagSubmit}
+                disabled={flagging}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#ffffff',
+                  backgroundColor: flagging ? '#9ca3af' : '#ef4444',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: flagging ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!flagging) e.currentTarget.style.backgroundColor = '#dc2626';
+                }}
+                onMouseLeave={(e) => {
+                  if (!flagging) e.currentTarget.style.backgroundColor = '#ef4444';
+                }}
+              >
+                {flagging ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '32px',
+          right: '32px',
+          zIndex: 100,
+          backgroundColor: toastMessage.type === 'error' ? '#ef4444' : '#10b981',
+          color: '#ffffff',
+          padding: '16px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          fontSize: '15px',
+          fontWeight: '500'
+        }}>
+          <span style={{ fontSize: '20px' }}>
+            {toastMessage.type === 'error' ? '⚠️' : '✓'}
+          </span>
+          <div>
+            <div style={{ fontWeight: '600' }}>{toastMessage.title}</div>
+            <div style={{ fontSize: '13px', opacity: 0.9, marginTop: '2px' }}>
+              {toastMessage.description}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
