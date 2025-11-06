@@ -21,6 +21,8 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
   const [flagNote, setFlagNote] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: '', description: '', type: 'success' as 'success' | 'error' });
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriting, setFavoriting] = useState(false);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   // Check if user has already flagged this video
@@ -40,6 +42,25 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
     }
 
     checkFlagged();
+  }, [video.id]);
+
+  // Check if user has favorited this video
+  useEffect(() => {
+    async function checkFavorited() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('user_favorites')
+        .select('id')
+        .eq('submission_id', video.id)
+        .eq('user_id', user.id)
+        .single();
+
+      setIsFavorited(!!data);
+    }
+
+    checkFavorited();
   }, [video.id]);
 
   async function handleFlagSubmit() {
@@ -96,6 +117,71 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
       setTimeout(() => setShowToast(false), 3000);
     } finally {
       setFlagging(false);
+    }
+  }
+
+  async function toggleFavorite() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setToastMessage({
+        title: 'Login Required',
+        description: 'Please log in to favorite videos',
+        type: 'error'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
+
+    setFavoriting(true);
+    try {
+      if (isFavorited) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('user_favorites')
+          .delete()
+          .eq('submission_id', video.id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        setIsFavorited(false);
+        setToastMessage({
+          title: 'Removed from Favorites',
+          description: 'Video removed from your favorites',
+          type: 'success'
+        });
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('user_favorites')
+          .insert({
+            submission_id: video.id,
+            user_id: user.id
+          });
+
+        if (error) throw error;
+
+        setIsFavorited(true);
+        setToastMessage({
+          title: 'Added to Favorites',
+          description: 'Video saved to your favorites',
+          type: 'success'
+        });
+      }
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setToastMessage({
+        title: 'Failed to Update',
+        description: 'Please try again later',
+        type: 'error'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setFavoriting(false);
     }
   }
 
@@ -182,6 +268,38 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
             alignItems: 'center',
             gap: '12px'
           }}>
+            {/* Favorite Button */}
+            <button
+              onClick={toggleFavorite}
+              disabled={favoriting}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: isFavorited ? '#ef4444' : '#374151',
+                color: '#ffffff',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '20px',
+                cursor: favoriting ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+              onMouseEnter={(e) => {
+                if (!favoriting) {
+                  e.currentTarget.style.backgroundColor = isFavorited ? '#dc2626' : '#4b5563';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = isFavorited ? '#ef4444' : '#374151';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              {isFavorited ? '❤️' : '🤍'}
+            </button>
+
             {/* Flag Button */}
             {!flagged ? (
               <button
