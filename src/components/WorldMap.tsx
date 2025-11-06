@@ -26,6 +26,26 @@ function getCountryColor(geoName: string): string {
   return COUNTRY_COLORS[hash % COUNTRY_COLORS.length];
 }
 
+// Map GeoJSON country names to our country codes
+const GEO_NAME_TO_CODE: Record<string, string> = {
+  'United States of America': 'USA',
+  'Czechia': 'CZE',
+  'Palestine': 'PSE',
+  'Turkey': 'TUR',
+  'Türkiye': 'TUR',
+  'Republic of the Congo': 'COG',
+  'Democratic Republic of the Congo': 'COD',
+  'Congo': 'COG',
+  'North Korea': 'PRK',
+  'South Korea': 'KOR',
+  'Ivory Coast': 'CIV',
+  'Côte d\'Ivoire': 'CIV',
+  'East Timor': 'TLS',
+  'Timor-Leste': 'TLS',
+  'Swaziland': 'SWZ',
+  'Eswatini': 'SWZ',
+};
+
 interface WorldMapProps {
   onCountryClick: (countryCode: string) => void;
   selectedCountry?: string | null;
@@ -86,13 +106,13 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
                   return null;
                 }
 
-                const country = countries.find(c =>
-                  c.name.toLowerCase() === geoName.toLowerCase() ||
-                  // Handle some common naming differences
-                  (geoName === 'United States of America' && c.name === 'United States') ||
-                  (geoName === 'Czechia' && c.name === 'Czech Republic') ||
-                  (geoName === 'Palestine' && c.code === 'PSE')
-                );
+                // First try direct name match, then use mapping
+                let country = countries.find(c => c.name.toLowerCase() === geoName.toLowerCase());
+
+                if (!country && GEO_NAME_TO_CODE[geoName]) {
+                  country = countries.find(c => c.code === GEO_NAME_TO_CODE[geoName]);
+                }
+
                 const isSelected = selectedCountry === country?.code;
                 const countryColor = getCountryColor(geoName);
 
