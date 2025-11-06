@@ -7,6 +7,7 @@ import CountrySidebar from '@/components/CountrySidebar';
 import VideoPlayer from '@/components/VideoPlayer';
 import AuthModal from '@/components/AuthModal';
 import SubmissionForm from '@/components/SubmissionForm';
+import ProfileModal from '@/components/ProfileModal';
 import type { VideoSubmission, VideoCategory } from '@/types';
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: '', description: '' });
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState<Record<VideoCategory, number>>({
     inspiration: 0,
     music: 0,
@@ -177,6 +179,11 @@ export default function Home() {
     setShowSubmissionForm(true);
   }
 
+  function handleEditSubmission(countryCode: string) {
+    setSelectedCountry(countryCode);
+    setShowSubmissionForm(true);
+  }
+
   function handleAuthSuccess() {
     setShowAuthModal(false);
     // Keep submission form open if it was already open
@@ -269,29 +276,52 @@ export default function Home() {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    setUser(null);
-                  }}
-                  style={{
-                    color: '#6b7280',
-                    cursor: 'pointer',
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    textDecoration: 'underline',
-                    padding: 0,
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#6b7280';
-                  }}
-                >
-                  Log Out
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowProfileModal(true)}
+                    style={{
+                      color: '#6b7280',
+                      cursor: 'pointer',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#000000';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#6b7280';
+                    }}
+                  >
+                    Profile
+                  </button>
+                  <span style={{ color: '#d1d5db' }}>|</span>
+                  <button
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      setUser(null);
+                    }}
+                    style={{
+                      color: '#6b7280',
+                      cursor: 'pointer',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      textDecoration: 'underline',
+                      padding: 0,
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#000000';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#6b7280';
+                    }}
+                  >
+                    Log Out
+                  </button>
+                </>
               )}
             </div>
 
@@ -507,6 +537,18 @@ export default function Home() {
           onClose={() => setShowSubmissionForm(false)}
           onSuccess={handleSubmissionSuccess}
           onAuthRequired={() => setShowAuthModal(true)}
+        />
+      )}
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <ProfileModal
+          onClose={() => setShowProfileModal(false)}
+          onPlayVideo={(video, category) => {
+            setCurrentVideo({ video, category });
+            setShowProfileModal(false);
+          }}
+          onEditSubmission={handleEditSubmission}
         />
       )}
 
