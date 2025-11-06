@@ -60,7 +60,7 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
   return (
     <div
       className="relative w-full h-full"
-      style={{ backgroundColor: '#add1ff' }} // Light blue ocean
+      style={{ backgroundColor: '#475569' }} // Darker greyish-blue ocean (slate-600)
     >
       {/* Tooltip */}
       {tooltip && (
@@ -126,7 +126,9 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
                     geography={geo}
                     onClick={(e) => {
                       e.stopPropagation();
+                      console.log('Clicked on:', geoName, 'Country found:', country);
                       if (country) {
+                        console.log('Calling onCountryClick with code:', country.code);
                         onCountryClick(country.code);
                       } else {
                         console.log('No match found for:', geoName);

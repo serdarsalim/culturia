@@ -33,9 +33,11 @@ export default function Home() {
   }, []);
 
   function handleCountryClick(countryCode: string) {
+    console.log('handleCountryClick called with:', countryCode);
     setSelectedCountry(countryCode);
     setSidebarOpen(true);
     setCurrentVideo(null);
+    console.log('Sidebar should now be open');
   }
 
   function handleCloseSidebar() {
