@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { getCountryName, getCountryFlag, getAllCountries } from '@/lib/countries';
+import { getCountryName, getCountryFlag } from '@/lib/countries';
 import { CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
 import { getYouTubeThumbnail, getYouTubeWatchUrl } from '@/lib/youtube';
 import AdminLayout from '@/components/AdminLayout';
