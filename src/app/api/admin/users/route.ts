@@ -83,7 +83,8 @@ export async function GET(request: Request) {
       email: u.email || 'No email',
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at,
-      banned_until: u.banned_until,
+      // 'banned_until' is present at runtime from GoTrue but not typed in @supabase/supabase-js
+      banned_until: (u as any).banned_until ?? null,
       submission_count: submissionCounts[u.id] || 0,
       rejected_count: rejectedCounts[u.id] || 0,
       is_admin: adminUserIds.has(u.id),
