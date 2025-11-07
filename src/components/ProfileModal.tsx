@@ -321,7 +321,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                             <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600 }}>
                               {CATEGORY_LABELS[category]}
                             </span>
-                            <span style={{ fontSize: '14px', color: '#111827', fontWeight: 500 }}>
+                            <span style={{ fontSize: '14px', color: '#111827', fontWeight: 600 }}>
                               {video.title || 'Untitled'}
                             </span>
                           </div>
@@ -368,7 +368,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                                 border: 'none',
                                 color: '#111827',
                                 fontSize: '14px',
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 cursor: 'pointer',
                                 padding: 0
                               }}
