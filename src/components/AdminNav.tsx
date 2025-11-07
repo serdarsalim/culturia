@@ -25,45 +25,95 @@ export default function AdminNav({ pendingCount = 0, adminEmail }: AdminNavProps
   ];
 
   return (
-    <div className="w-64 bg-zinc-900 min-h-screen flex flex-col">
+    <div style={{
+      width: '256px',
+      background: '#18181b',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       {/* Header */}
-      <div className="p-6 border-b border-zinc-800">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-xl font-bold">C</span>
+      <div style={{
+        padding: '24px',
+        borderBottom: '1px solid #27272a',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '16px',
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <span style={{ color: 'white', fontSize: '20px', fontWeight: 'bold' }}>C</span>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">CULTURIA</h1>
-            <p className="text-xs text-zinc-400">Admin Panel</p>
+            <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>CULTURIA</h1>
+            <p style={{ fontSize: '12px', color: '#a1a1aa' }}>Admin Panel</p>
           </div>
         </div>
-        <p className="text-xs text-zinc-500 truncate">{adminEmail}</p>
+        <p style={{
+          fontSize: '12px',
+          color: '#71717a',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}>
+          {adminEmail}
+        </p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav style={{
+        flex: 1,
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <a
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
-                isActive
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                background: isActive ? 'linear-gradient(90deg, #f59e0b 0%, #ea580c 100%)' : 'transparent',
+                color: isActive ? 'white' : '#a1a1aa',
+                boxShadow: isActive ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none',
+              }}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}>
+                <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                <span style={{ fontWeight: '500' }}>{item.label}</span>
               </div>
               {item.badge !== null && (
-                <span className={`px-2 py-1 text-xs font-bold rounded-full ${
-                  isActive
-                    ? 'bg-white text-amber-600'
-                    : 'bg-amber-500 text-white'
-                }`}>
+                <span style={{
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  borderRadius: '999px',
+                  background: isActive ? 'white' : '#f59e0b',
+                  color: isActive ? '#ea580c' : 'white',
+                }}>
                   {item.badge}
                 </span>
               )}
@@ -73,22 +123,50 @@ export default function AdminNav({ pendingCount = 0, adminEmail }: AdminNavProps
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-zinc-800 space-y-2">
+      <div style={{
+        padding: '16px',
+        borderTop: '1px solid #27272a',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+      }}>
         <a
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            color: '#a1a1aa',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+          }}
         >
-          <span className="text-xl">🌍</span>
-          <span className="font-medium">View Site</span>
+          <span style={{ fontSize: '20px' }}>🌍</span>
+          <span style={{ fontWeight: '500' }}>View Site</span>
         </a>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            color: '#a1a1aa',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            fontSize: '16px',
+          }}
         >
-          <span className="text-xl">🚪</span>
-          <span className="font-medium">Sign Out</span>
+          <span style={{ fontSize: '20px' }}>🚪</span>
+          <span style={{ fontWeight: '500' }}>Sign Out</span>
         </button>
       </div>
     </div>

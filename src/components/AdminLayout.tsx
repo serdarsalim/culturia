@@ -53,19 +53,45 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   if (loading || !adminUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
-          <p className="mt-4 text-zinc-400">Loading admin panel...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#18181b',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            border: '2px solid #f59e0b',
+            borderTopColor: 'transparent',
+            borderRadius: '50%',
+            margin: '0 auto',
+            animation: 'spin 1s linear infinite',
+          }}></div>
+          <p style={{ marginTop: '16px', color: '#a1a1aa' }}>Loading admin panel...</p>
         </div>
+        <style jsx>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-950">
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: '#09090b',
+    }}>
       <AdminNav pendingCount={pendingCount} adminEmail={adminUser.email} />
-      <main className="flex-1 overflow-auto">
+      <main style={{
+        flex: 1,
+        overflow: 'auto',
+      }}>
         {children}
       </main>
     </div>
