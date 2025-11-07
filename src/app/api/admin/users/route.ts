@@ -1,0 +1,148 @@
+import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
+
+// Create admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
+
+export async function GET(request: Request) {
+  try {
+    // Verify the requester is an admin
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is admin
+    const { data: adminUser, error: adminError } = await supabaseAdmin
+      .from('admin_users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json({ error: 'Not an admin' }, { status: 403 });
+    }
+
+    // Fetch all users
+    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+
+    if (authError) {
+      throw authError;
+    }
+
+    // Fetch submission counts
+    const { data: submissions, error: submissionsError } = await supabaseAdmin
+      .from('video_submissions')
+      .select('user_id');
+
+    if (submissionsError) {
+      throw submissionsError;
+    }
+
+    // Count submissions per user
+    const submissionCounts = submissions?.reduce((acc: Record<string, number>, sub) => {
+      acc[sub.user_id] = (acc[sub.user_id] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Combine user data with submission counts
+    const usersWithCounts = authUsers.users.map(u => ({
+      id: u.id,
+      email: u.email || 'No email',
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at,
+      banned_until: u.banned_until,
+      submission_count: submissionCounts?.[u.id] || 0,
+    }));
+
+    return NextResponse.json({ users: usersWithCounts });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is admin
+    const { data: adminUser, error: adminError } = await supabaseAdmin
+      .from('admin_users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (adminError || !adminUser) {
+      return NextResponse.json({ error: 'Not an admin' }, { status: 403 });
+    }
+
+    const { action, userId, email } = await request.json();
+
+    if (action === 'suspend') {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        ban_duration: '876000h', // 100 years
+      });
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, message: 'User suspended' });
+    }
+
+    if (action === 'unsuspend') {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        ban_duration: 'none',
+      });
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, message: 'User unsuspended' });
+    }
+
+    if (action === 'delete') {
+      // First delete all their submissions
+      const { error: submissionsError } = await supabaseAdmin
+        .from('video_submissions')
+        .delete()
+        .eq('user_id', userId);
+
+      if (submissionsError) throw submissionsError;
+
+      // Then delete the user
+      const { error: userDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+      if (userDeleteError) throw userDeleteError;
+
+      return NextResponse.json({ success: true, message: 'User deleted' });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error) {
+    console.error('Error managing user:', error);
+    return NextResponse.json({ error: 'Failed to manage user' }, { status: 500 });
+  }
+}

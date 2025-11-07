@@ -26,35 +26,25 @@ export default function UsersPage() {
   async function fetchUsers() {
     setLoading(true);
     try {
-      // Fetch all users from auth.users
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
 
-      if (authError) throw authError;
+      // Fetch users via API route
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
 
-      // Fetch submission counts for each user
-      const { data: submissions, error: submissionsError } = await supabase
-        .from('video_submissions')
-        .select('user_id');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
 
-      if (submissionsError) throw submissionsError;
-
-      // Count submissions per user
-      const submissionCounts = submissions?.reduce((acc: Record<string, number>, sub) => {
-        acc[sub.user_id] = (acc[sub.user_id] || 0) + 1;
-        return acc;
-      }, {});
-
-      // Combine user data with submission counts
-      const usersWithCounts = authUsers.users.map(user => ({
-        id: user.id,
-        email: user.email || 'No email',
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        banned_until: user.banned_until,
-        submission_count: submissionCounts?.[user.id] || 0,
-      }));
-
-      setUsers(usersWithCounts);
+      const { users: fetchedUsers } = await response.json();
+      setUsers(fetchedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       showToast('Failed to load users', 'error');
@@ -69,12 +59,19 @@ export default function UsersPage() {
     }
 
     try {
-      // Ban user for 100 years (effectively permanent)
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        ban_duration: '876000h', // 100 years
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'suspend', userId, email }),
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to suspend user');
 
       showToast('User suspended successfully', 'success');
       fetchUsers();
@@ -90,11 +87,19 @@ export default function UsersPage() {
     }
 
     try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        ban_duration: 'none',
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'unsuspend', userId, email }),
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to unsuspend user');
 
       showToast('User unsuspended successfully', 'success');
       fetchUsers();
@@ -110,18 +115,19 @@ export default function UsersPage() {
     }
 
     try {
-      // First delete all their submissions
-      const { error: submissionsError } = await supabase
-        .from('video_submissions')
-        .delete()
-        .eq('user_id', userId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      if (submissionsError) throw submissionsError;
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'delete', userId, email }),
+      });
 
-      // Then delete the user
-      const { error: userError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (userError) throw userError;
+      if (!response.ok) throw new Error('Failed to delete user');
 
       showToast('User and all data deleted successfully', 'success');
       fetchUsers();
