@@ -88,75 +88,128 @@ export default function RejectedSubmissions() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div style={{ padding: '32px' }}>
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Rejected Submissions</h1>
-          <p className="text-zinc-400">Review rejected videos and re-approve if needed</p>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+            Rejected Submissions
+          </h1>
+          <p style={{ color: '#a1a1aa' }}>Review rejected videos and re-approve if needed</p>
         </div>
 
         {/* Toast */}
         {toast && (
-          <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg ${
-            toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-          } text-white font-medium animate-slide-down`}>
+          <div style={{
+            position: 'fixed',
+            top: '16px',
+            right: '16px',
+            zIndex: 50,
+            padding: '16px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+            background: toast.type === 'success' ? '#16a34a' : '#dc2626',
+            color: 'white',
+            fontWeight: '500',
+          }}>
             {toast.message}
           </div>
         )}
 
         {/* Submissions List */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
-            <p className="mt-4 text-zinc-400">Loading submissions...</p>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              border: '2px solid #f59e0b',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              margin: '0 auto',
+              animation: 'spin 1s linear infinite',
+            }}></div>
+            <p style={{ marginTop: '16px', color: '#a1a1aa' }}>Loading submissions...</p>
+            <style jsx>{`
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
           </div>
         ) : submissions.length === 0 ? (
-          <div className="bg-zinc-900 rounded-xl p-12 text-center border border-zinc-800">
-            <span className="text-6xl mb-4 block">🎉</span>
-            <p className="text-xl text-zinc-400">No rejected submissions!</p>
-            <p className="text-zinc-500 mt-2">Everything looks good</p>
+          <div style={{
+            background: '#18181b',
+            borderRadius: '12px',
+            padding: '48px',
+            textAlign: 'center',
+            border: '1px solid #27272a',
+          }}>
+            <span style={{ fontSize: '60px', display: 'block', marginBottom: '16px' }}>🎉</span>
+            <p style={{ fontSize: '20px', color: '#a1a1aa' }}>No rejected submissions!</p>
+            <p style={{ color: '#71717a', marginTop: '8px' }}>Everything looks good</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {submissions.map((submission) => (
-              <div key={submission.id} className="bg-zinc-900 rounded-xl border border-red-900/50 overflow-hidden">
-                <div className="p-6">
-                  <div className="flex gap-6">
+              <div key={submission.id} style={{
+                background: '#18181b',
+                borderRadius: '12px',
+                border: '1px solid rgba(127, 29, 29, 0.5)',
+                overflow: 'hidden',
+              }}>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', gap: '24px' }}>
                     {/* Thumbnail */}
-                    <div className="flex-shrink-0">
+                    <div style={{ flexShrink: 0 }}>
                       <img
                         src={getYouTubeThumbnail(submission.youtube_video_id)}
                         alt="Video thumbnail"
-                        className="w-48 h-27 object-cover rounded-lg opacity-75"
+                        style={{
+                          width: '192px',
+                          height: '108px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          opacity: 0.75,
+                        }}
                       />
                     </div>
 
                     {/* Details */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        marginBottom: '16px',
+                      }}>
                         <div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-3xl">{getCountryFlag(submission.country_code)}</span>
-                            <span className="font-semibold text-xl text-white">
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            marginBottom: '12px',
+                          }}>
+                            <span style={{ fontSize: '28px' }}>{getCountryFlag(submission.country_code)}</span>
+                            <span style={{ fontWeight: '600', fontSize: '20px', color: 'white' }}>
                               {getCountryName(submission.country_code)}
                             </span>
-                            <span className="text-zinc-600">•</span>
-                            <span className="text-2xl">{categoryIcons[submission.category as VideoCategory]}</span>
-                            <span className="text-zinc-300 font-medium">
+                            <span style={{ color: '#52525b' }}>•</span>
+                            <span style={{ fontSize: '24px' }}>{categoryIcons[submission.category as VideoCategory]}</span>
+                            <span style={{ color: '#d4d4d8', fontWeight: '500' }}>
                               {CATEGORY_LABELS[submission.category as VideoCategory]}
                             </span>
                           </div>
 
                           {submission.title && (
-                            <p className="text-white text-lg mb-3">{submission.title}</p>
+                            <p style={{ color: 'white', fontSize: '18px', marginBottom: '12px' }}>
+                              {submission.title}
+                            </p>
                           )}
 
-                          <div className="space-y-1">
-                            <p className="text-sm text-zinc-400">
-                              <span className="text-zinc-500">Submitted by:</span> {submission.user_email}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <p style={{ fontSize: '14px', color: '#a1a1aa' }}>
+                              <span style={{ color: '#71717a' }}>Submitted by:</span> {submission.user_email}
                             </p>
-                            <p className="text-sm text-zinc-400">
-                              <span className="text-zinc-500">Date:</span>{' '}
+                            <p style={{ fontSize: '14px', color: '#a1a1aa' }}>
+                              <span style={{ color: '#71717a' }}>Date:</span>{' '}
                               {new Date(submission.created_at).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
@@ -167,39 +220,97 @@ export default function RejectedSubmissions() {
                         </div>
 
                         {/* Status Badge */}
-                        <span className="px-4 py-2 bg-red-500/20 border border-red-500 text-red-500 text-sm font-semibold rounded-lg">
+                        <span style={{
+                          padding: '8px 16px',
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid #ef4444',
+                          color: '#ef4444',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          borderRadius: '8px',
+                        }}>
                           ❌ REJECTED
                         </span>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-3 mt-6">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '24px' }}>
                         <a
                           href={getYouTubeWatchUrl(submission.youtube_video_id)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-5 py-2.5 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors text-sm font-medium"
+                          style={{
+                            padding: '10px 20px',
+                            background: '#27272a',
+                            color: 'white',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            textDecoration: 'none',
+                            transition: 'background 0.2s',
+                            display: 'inline-block',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#3f3f46'}
+                          onMouseOut={(e) => e.currentTarget.style.background = '#27272a'}
                         >
                           🔗 YouTube
                         </a>
 
                         <button
                           onClick={() => updateStatus(submission.id, 'approved')}
-                          className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shadow-lg shadow-green-600/20"
+                          style={{
+                            padding: '10px 20px',
+                            background: '#16a34a',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            boxShadow: '0 10px 15px -3px rgba(22, 163, 74, 0.2)',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#15803d'}
+                          onMouseOut={(e) => e.currentTarget.style.background = '#16a34a'}
                         >
                           ✅ Re-Approve
                         </button>
 
                         <button
                           onClick={() => updateStatus(submission.id, 'pending')}
-                          className="px-5 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium shadow-lg shadow-yellow-600/20"
+                          style={{
+                            padding: '10px 20px',
+                            background: '#ca8a04',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            boxShadow: '0 10px 15px -3px rgba(202, 138, 4, 0.2)',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#a16207'}
+                          onMouseOut={(e) => e.currentTarget.style.background = '#ca8a04'}
                         >
                           ⏳ Move to Pending
                         </button>
 
                         <button
                           onClick={() => deleteSubmission(submission.id)}
-                          className="px-5 py-2.5 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 transition-colors text-sm font-medium"
+                          style={{
+                            padding: '10px 20px',
+                            background: '#3f3f46',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#52525b'}
+                          onMouseOut={(e) => e.currentTarget.style.background = '#3f3f46'}
                         >
                           🗑️ Delete
                         </button>
