@@ -50,9 +50,10 @@ interface WorldMapProps {
   onCountryClick: (countryCode: string) => void;
   selectedCountry?: string | null;
   onBackgroundClick?: () => void;
+  countriesWithVideos?: Set<string>;
 }
 
-export default function WorldMap({ onCountryClick, selectedCountry, onBackgroundClick }: WorldMapProps) {
+export default function WorldMap({ onCountryClick, selectedCountry, onBackgroundClick, countriesWithVideos }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<{ name: string; x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 20]);
@@ -141,7 +142,8 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
                 }
 
                 const isSelected = selectedCountry === country?.code;
-                const countryColor = getCountryColor(geoName);
+                const hasVideos = country ? countriesWithVideos?.has(country.code) === true : false;
+                const countryColor = hasVideos ? getCountryColor(geoName) : '#9ca3af'; // slate-400 for no videos
 
                 return (
                   <Geography
@@ -183,25 +185,26 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
                     style={{
                       default: {
                         fill: countryColor,
-                        stroke: isSelected ? '#1e40af' : '#fff', // Dark blue border for selected
+                        stroke: isSelected ? '#1e40af' : '#fff',
                         strokeWidth: isSelected ? 2 : 0.75,
                         outline: 'none',
                         transition: 'all 0.2s ease',
+                        opacity: hasVideos ? 1 : 0.6,
                       },
                       hover: {
                         fill: countryColor,
-                        stroke: '#1e40af', // Dark blue border on hover
+                        stroke: '#1e40af',
                         strokeWidth: 2,
                         outline: 'none',
                         cursor: 'pointer',
-                        filter: 'brightness(0.9)',
+                        filter: hasVideos ? 'brightness(0.9)' : 'none',
                       },
                       pressed: {
                         fill: countryColor,
                         stroke: '#1e40af',
                         strokeWidth: 2,
                         outline: 'none',
-                        filter: 'brightness(0.8)',
+                        filter: hasVideos ? 'brightness(0.8)' : 'none',
                       },
                     }}
                   />

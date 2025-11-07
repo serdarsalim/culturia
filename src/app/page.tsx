@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import WorldMap from '@/components/WorldMap';
 import CountrySidebar from '@/components/CountrySidebar';
@@ -34,6 +34,16 @@ export default function Home() {
     cooking: 0,
     street_voices: 0,
   });
+
+  // Set of countries that currently have at least one approved video
+  const countriesWithVideos = useMemo(() => {
+    if (!videoCacheReady) return new Set<string>();
+    const set = new Set<string>();
+    for (const v of videoCache) {
+      if (v.country_code) set.add(v.country_code);
+    }
+    return set;
+  }, [videoCache, videoCacheReady]);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -749,6 +759,7 @@ export default function Home() {
           onCountryClick={handleCountryClick}
           selectedCountry={selectedCountry}
           onBackgroundClick={handleBackgroundClick}
+          countriesWithVideos={countriesWithVideos}
         />
       </div>
 
