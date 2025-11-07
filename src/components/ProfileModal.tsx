@@ -375,10 +375,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                             >
                               {video.title || 'Untitled'}
                             </button>
-                            {/* Status next to title */}
-                            {renderStatusBadge(video.status)}
                           </div>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <button
                               onClick={() => {
                                 onEditSubmission(video.country_code);
@@ -418,6 +416,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                             >
                               Delete
                             </button>
+                            {/* Right-aligned status badge */}
+                            {renderStatusBadge(video.status)}
                           </div>
                         </div>
                       ))}
