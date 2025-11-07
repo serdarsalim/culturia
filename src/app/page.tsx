@@ -103,44 +103,77 @@ export default function Home() {
     }
   }
 
-  // Fetch and cache ALL approved videos on page load
-  useEffect(() => {
-    async function fetchAndCacheVideos() {
-      try {
-        console.log('🚀 Fetching all approved videos for cache...');
-        const { data, error } = await supabase
-          .from('video_submissions')
-          .select('*')
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false });
+  // Fetch and cache ALL approved videos
+  async function refreshVideoCache() {
+    try {
+      console.log('🔄 Refreshing video cache...');
+      const { data, error } = await supabase
+        .from('video_submissions')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        const videos = data || [];
-        setVideoCache(videos);
-        setVideoCacheReady(true);
+      const videos = data || [];
+      setVideoCache(videos);
+      setVideoCacheReady(true);
 
-        // Calculate category counts from cached data
-        const counts: Record<VideoCategory, number> = {
-          inspiration: 0,
-          music: 0,
-          comedy: 0,
-          cooking: 0,
-          street_voices: 0,
-        };
+      // Calculate category counts from cached data
+      const counts: Record<VideoCategory, number> = {
+        inspiration: 0,
+        music: 0,
+        comedy: 0,
+        cooking: 0,
+        street_voices: 0,
+      };
 
-        videos.forEach((video) => {
-          counts[video.category as VideoCategory]++;
-        });
+      videos.forEach((video) => {
+        counts[video.category as VideoCategory]++;
+      });
 
-        setCategoryCounts(counts);
-        console.log(`✅ Cached ${videos.length} videos, counts:`, counts);
-      } catch (error) {
-        console.error('Error fetching video cache:', error);
-      }
+      setCategoryCounts(counts);
+      console.log(`✅ Cache refreshed: ${videos.length} videos, counts:`, counts);
+    } catch (error) {
+      console.error('Error refreshing video cache:', error);
     }
+  }
 
-    fetchAndCacheVideos();
+  // Initial cache load + real-time updates + periodic refresh
+  useEffect(() => {
+    // Initial load
+    refreshVideoCache();
+
+    // Set up real-time subscription for instant updates
+    const subscription = supabase
+      .channel('video_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'video_submissions',
+          filter: 'status=eq.approved'
+        },
+        (payload) => {
+          console.log('🔔 Real-time update detected:', payload.eventType);
+          // Refresh cache when approved videos change
+          refreshVideoCache();
+        }
+      )
+      .subscribe();
+
+    // Periodic refresh every 30 seconds as backup
+    const intervalId = setInterval(() => {
+      console.log('⏰ Periodic cache refresh (30s)');
+      refreshVideoCache();
+    }, 30000);
+
+    // Cleanup
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(intervalId);
+    };
   }, []);
 
   function handleCountryClick(countryCode: string) {
@@ -240,6 +273,11 @@ export default function Home() {
     setTimeout(() => {
       setShowToast(false);
     }, 3000);
+
+    // Refresh profile data to show new submission
+    if (user) {
+      preloadProfileData(user.id);
+    }
   }
 
   return (
