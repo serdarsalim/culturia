@@ -34,30 +34,34 @@ export default function Home() {
     cooking: 0,
     street_voices: 0,
   });
-  const [mapFilter, setMapFilter] = useState<'all' | 'favorites' | 'mine'>('all');
+  const [mapSources, setMapSources] = useState<{ all: boolean; favorites: boolean; mine: boolean }>({
+    all: true,
+    favorites: false,
+    mine: false,
+  });
 
   // Set of countries that currently have at least one approved video
   const countriesWithVideos = useMemo(() => {
     const set = new Set<string>();
 
-    if (mapFilter === 'all') {
-      if (videoCacheReady) {
-        for (const v of videoCache) {
-          if (v.country_code) set.add(v.country_code);
-        }
+    if (mapSources.all && videoCacheReady) {
+      for (const v of videoCache) {
+        if (v.country_code) set.add(v.country_code);
       }
-    } else if (mapFilter === 'favorites' && profileData) {
+    }
+    if (mapSources.favorites && profileData) {
       for (const fav of profileData.favorites) {
         if (fav.video?.country_code) set.add(fav.video.country_code);
       }
-    } else if (mapFilter === 'mine' && profileData) {
+    }
+    if (mapSources.mine && profileData) {
       for (const sub of profileData.submissions) {
         if (sub.country_code) set.add(sub.country_code);
       }
     }
 
     return set;
-  }, [mapFilter, videoCache, videoCacheReady, profileData]);
+  }, [mapSources, videoCache, videoCacheReady, profileData]);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -816,8 +820,8 @@ export default function Home() {
           }}
           onEditSubmission={handleEditSubmission}
           initialData={profileData}
-          mapFilter={mapFilter}
-          onChangeMapFilter={(f) => setMapFilter(f)}
+          mapSources={mapSources}
+          onToggleMapSource={(key, value) => setMapSources((prev) => ({ ...prev, [key]: value }))}
         />
       )}
 

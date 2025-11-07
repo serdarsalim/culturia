@@ -5,8 +5,6 @@ import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
 import { CATEGORY_LABELS, type VideoCategory, type VideoSubmission } from '@/types';
 
-type MapFilter = 'all' | 'favorites' | 'mine';
-
 interface ProfileModalProps {
   onClose: () => void;
   onPlayVideo: (video: VideoSubmission, category: VideoCategory) => void;
@@ -15,11 +13,11 @@ interface ProfileModalProps {
     favorites: Array<{ video: VideoSubmission; category: VideoCategory }>;
     submissions: VideoSubmission[];
   } | null;
-  mapFilter: MapFilter;
-  onChangeMapFilter: (value: MapFilter) => void;
+  mapSources: { all: boolean; favorites: boolean; mine: boolean };
+  onToggleMapSource: (key: 'all' | 'favorites' | 'mine', value: boolean) => void;
 }
 
-export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, initialData, mapFilter, onChangeMapFilter }: ProfileModalProps) {
+export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, initialData, mapSources, onToggleMapSource }: ProfileModalProps) {
   const [activeTab, setActiveTab] = useState<'favorites' | 'submissions' | 'settings'>('favorites');
   const [favorites, setFavorites] = useState<Array<{ video: VideoSubmission; category: VideoCategory }>>(initialData?.favorites || []);
   const [submissions, setSubmissions] = useState<VideoSubmission[]>(initialData?.submissions || []);
@@ -424,53 +422,51 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Map Visibility</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>Choose what the map highlights.</p>
-                <div
-                  role="group"
-                  aria-label="Map visibility"
-                  style={{
-                    display: 'inline-flex',
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: '9999px',
-                    padding: '4px',
-                    border: '1px solid #d1d5db'
-                  }}
-                >
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>Choose what the map highlights. You can select multiple.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '360px' }}>
                   {([
-                    { key: 'all', label: 'All' },
-                    { key: 'favorites', label: 'Favorites' },
-                    { key: 'mine', label: 'My Submissions' },
-                  ] as Array<{ key: 'all' | 'favorites' | 'mine'; label: string }>).map(opt => {
-                    const active = mapFilter === opt.key;
+                    { key: 'all', label: 'All approved videos', desc: 'Public, approved content' },
+                    { key: 'favorites', label: 'My favorites', desc: 'Places you starred', requiresAuth: true },
+                    { key: 'mine', label: 'My submissions', desc: 'Countries you contributed to', requiresAuth: true },
+                  ] as Array<{ key: 'all' | 'favorites' | 'mine'; label: string; desc: string; requiresAuth?: boolean }>).map(opt => {
+                    const checked = mapSources[opt.key];
                     return (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        aria-pressed={active}
-                        onClick={() => onChangeMapFilter(opt.key)}
-                        style={{
-                          appearance: 'none',
-                          WebkitAppearance: 'none',
-                          backgroundColor: active ? '#ffffff' : 'transparent',
-                          color: active ? '#111827' : '#374151',
-                          border: active ? '1px solid #d1d5db' : '1px solid transparent',
-                          borderRadius: '9999px',
-                          padding: '8px 14px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!active) e.currentTarget.style.backgroundColor = '#f3f4f6';
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!active) e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                      >
-                        {opt.label}
-                      </button>
+                      <label key={opt.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '14px', color: '#111827', fontWeight: 600 }}>{opt.label}</span>
+                          <span style={{ fontSize: '12px', color: '#6b7280' }}>{opt.desc}</span>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={checked}
+                          onClick={() => onToggleMapSource(opt.key, !checked)}
+                          style={{
+                            width: '48px',
+                            height: '28px',
+                            borderRadius: '9999px',
+                            border: '1px solid ' + (checked ? '#34d399' : '#d1d5db'),
+                            backgroundColor: checked ? '#34d399' : '#e5e7eb',
+                            position: 'relative',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                          aria-label={`Toggle ${opt.label}`}
+                        >
+                          <span style={{
+                            position: 'absolute',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            left: checked ? '22px' : '2px',
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '9999px',
+                            backgroundColor: '#ffffff',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                            transition: 'left 0.15s ease'
+                          }} />
+                        </button>
+                      </label>
                     );
                   })}
                 </div>
