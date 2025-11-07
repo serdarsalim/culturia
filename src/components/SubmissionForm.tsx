@@ -181,6 +181,20 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
         return;
       }
 
+      // Determine if current user is an admin; if so, auto-approve
+      let isAdmin = false;
+      try {
+        const { data: adminRow, error: adminErr } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('id', user.id)
+          .single();
+        isAdmin = !!adminRow && !adminErr;
+      } catch (_) {
+        // If we can't read admin_users (due to RLS), treat as non-admin
+        isAdmin = false;
+      }
+
       // Submit each category that has a URL
       for (const [category, data] of Object.entries(formData)) {
         if (data.url.trim()) {
@@ -198,7 +212,7 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
               title: data.title,
               user_id: user.id,
               user_email: user.email!,
-              status: 'pending', // Always reset to pending on resubmission
+              status: isAdmin ? 'approved' : 'pending',
             }, {
               onConflict: 'user_id,country_code,category'
             });
