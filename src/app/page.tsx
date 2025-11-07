@@ -21,6 +21,12 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState({ title: '', description: '' });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [profileData, setProfileData] = useState<{
+    favorites: Array<{ video: VideoSubmission; category: VideoCategory }>;
+    submissions: VideoSubmission[];
+  } | null>(null);
+  const [videoCache, setVideoCache] = useState<VideoSubmission[]>([]);
+  const [videoCacheReady, setVideoCacheReady] = useState(false);
   const [categoryCounts, setCategoryCounts] = useState<Record<VideoCategory, number>>({
     inspiration: 0,
     music: 0,
@@ -41,26 +47,80 @@ export default function Home() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Check authentication
+  // Check authentication and preload profile data
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        preloadProfileData(session.user.id);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        preloadProfileData(session.user.id);
+      } else {
+        setProfileData(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch video counts per category
+  // Preload profile data when user logs in
+  async function preloadProfileData(userId: string) {
+    try {
+      // Fetch favorites and submissions in parallel
+      const [favoritesResult, submissionsResult] = await Promise.all([
+        supabase
+          .from('user_favorites')
+          .select(`
+            submission_id,
+            video_submissions (*)
+          `)
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('video_submissions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+      ]);
+
+      const favorites = favoritesResult.data?.map((fav: any) => ({
+        video: fav.video_submissions,
+        category: fav.video_submissions.category as VideoCategory
+      })) || [];
+
+      const submissions = submissionsResult.data || [];
+
+      setProfileData({ favorites, submissions });
+    } catch (error) {
+      console.error('Error preloading profile data:', error);
+    }
+  }
+
+  // Fetch and cache ALL approved videos on page load
   useEffect(() => {
-    async function fetchCategoryCounts() {
+    async function fetchAndCacheVideos() {
       try {
-        const categories: VideoCategory[] = ['inspiration', 'music', 'comedy', 'cooking', 'street_voices'];
+        console.log('🚀 Fetching all approved videos for cache...');
+        const { data, error } = await supabase
+          .from('video_submissions')
+          .select('*')
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const videos = data || [];
+        setVideoCache(videos);
+        setVideoCacheReady(true);
+
+        // Calculate category counts from cached data
         const counts: Record<VideoCategory, number> = {
           inspiration: 0,
           music: 0,
@@ -69,25 +129,18 @@ export default function Home() {
           street_voices: 0,
         };
 
-        for (const category of categories) {
-          const { count, error } = await supabase
-            .from('video_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'approved')
-            .eq('category', category);
-
-          if (!error && count !== null) {
-            counts[category] = count;
-          }
-        }
+        videos.forEach((video) => {
+          counts[video.category as VideoCategory]++;
+        });
 
         setCategoryCounts(counts);
+        console.log(`✅ Cached ${videos.length} videos, counts:`, counts);
       } catch (error) {
-        console.error('Error fetching category counts:', error);
+        console.error('Error fetching video cache:', error);
       }
     }
 
-    fetchCategoryCounts();
+    fetchAndCacheVideos();
   }, []);
 
   function handleCountryClick(countryCode: string) {
@@ -115,75 +168,49 @@ export default function Home() {
     setCurrentVideo(null);
   }
 
-  async function handleNextVideo() {
-    if (!currentVideo) return;
+  function handleNextVideo() {
+    if (!currentVideo || !videoCacheReady) return;
 
-    try {
-      // Fetch another random video from same category and country
-      const { data, error } = await supabase
-        .from('video_submissions')
-        .select('*')
-        .eq('country_code', currentVideo.video.country_code)
-        .eq('category', currentVideo.category)
-        .eq('status', 'approved')
-        .neq('id', currentVideo.video.id) // Exclude current video
-        .order('created_at', { ascending: false })
-        .limit(10);
+    // Filter cached videos for same category and country, excluding current
+    const matchingVideos = videoCache.filter(v =>
+      v.country_code === currentVideo.video.country_code &&
+      v.category === currentVideo.category &&
+      v.id !== currentVideo.video.id
+    );
 
-      if (error) {
-        console.error('Error fetching next video:', error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const randomVideo = data[Math.floor(Math.random() * data.length)];
-        setCurrentVideo({ video: randomVideo, category: currentVideo.category });
-      } else {
-        // Show toast instead of alert
-        setToastMessage({
-          title: 'No More Videos',
-          description: 'No more videos available in this category for this country'
-        });
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      }
-    } catch (error) {
-      console.error('Error fetching next video:', error);
+    if (matchingVideos.length > 0) {
+      const randomVideo = matchingVideos[Math.floor(Math.random() * matchingVideos.length)];
+      setCurrentVideo({ video: randomVideo, category: currentVideo.category });
+    } else {
+      // Show toast
+      setToastMessage({
+        title: 'No More Videos',
+        description: 'No more videos available in this category for this country'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
   }
 
-  async function handleCategoryClick(category: VideoCategory) {
-    try {
-      // Fetch a random video from this category from any country
-      const { data, error } = await supabase
-        .from('video_submissions')
-        .select('*')
-        .eq('category', category)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(50); // Get 50 videos to have better randomness
+  function handleCategoryClick(category: VideoCategory) {
+    if (!videoCacheReady) return;
 
-      if (error) {
-        console.error('Error fetching random video:', error);
-        return;
-      }
+    // Filter cached videos for this category
+    const categoryVideos = videoCache.filter(v => v.category === category);
 
-      if (data && data.length > 0) {
-        const randomVideo = data[Math.floor(Math.random() * data.length)];
-        setCurrentVideo({ video: randomVideo, category });
-        // Close country sidebar if open
-        setSelectedCountry(null);
-      } else {
-        // Show toast instead of alert
-        setToastMessage({
-          title: 'No Videos Available',
-          description: 'No videos have been approved in this category yet'
-        });
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      }
-    } catch (error) {
-      console.error('Error fetching random video:', error);
+    if (categoryVideos.length > 0) {
+      const randomVideo = categoryVideos[Math.floor(Math.random() * categoryVideos.length)];
+      setCurrentVideo({ video: randomVideo, category });
+      // Close country sidebar if open
+      setSelectedCountry(null);
+    } else {
+      // Show toast
+      setToastMessage({
+        title: 'No Videos Available',
+        description: 'No videos have been approved in this category yet'
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
   }
 
@@ -236,6 +263,8 @@ export default function Home() {
             onClose={handleCloseSidebar}
             onVideoSelect={handleVideoSelect}
             onSubmitClick={handleSubmitClick}
+            videoCache={videoCache}
+            videoCacheReady={videoCacheReady}
           />
         ) : (
           <div className="h-full flex flex-col" style={{ padding: isMobile ? '16px 24px' : '32px' }}>
@@ -723,6 +752,7 @@ export default function Home() {
             setShowProfileModal(false);
           }}
           onEditSubmission={handleEditSubmission}
+          initialData={profileData}
         />
       )}
 

@@ -9,61 +9,97 @@ interface ProfileModalProps {
   onClose: () => void;
   onPlayVideo: (video: VideoSubmission, category: VideoCategory) => void;
   onEditSubmission: (countryCode: string) => void;
+  initialData?: {
+    favorites: Array<{ video: VideoSubmission; category: VideoCategory }>;
+    submissions: VideoSubmission[];
+  } | null;
 }
 
-export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission }: ProfileModalProps) {
+export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, initialData }: ProfileModalProps) {
   const [activeTab, setActiveTab] = useState<'favorites' | 'submissions'>('favorites');
-  const [favorites, setFavorites] = useState<Array<{ video: VideoSubmission; category: VideoCategory }>>([]);
-  const [submissions, setSubmissions] = useState<VideoSubmission[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Array<{ video: VideoSubmission; category: VideoCategory }>>(initialData?.favorites || []);
+  const [submissions, setSubmissions] = useState<VideoSubmission[]>(initialData?.submissions || []);
+  const [loading, setLoading] = useState(!initialData);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: '', description: '', type: 'success' as 'success' | 'error' });
 
-  // Fetch favorites and submissions
+  // Fetch both favorites and submissions on mount only if no initial data
   useEffect(() => {
-    fetchData();
+    if (!initialData) {
+      fetchAllData();
+    }
+  }, []);
+
+  // Refetch when tab changes
+  useEffect(() => {
+    if (activeTab === 'favorites' && favorites.length === 0) {
+      fetchFavorites();
+    } else if (activeTab === 'submissions' && submissions.length === 0) {
+      fetchSubmissions();
+    }
   }, [activeTab]);
 
-  async function fetchData() {
+  async function fetchAllData() {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      if (activeTab === 'favorites') {
-        // Fetch favorites with video details
-        const { data, error } = await supabase
-          .from('user_favorites')
-          .select(`
-            submission_id,
-            video_submissions (*)
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const favoritesData = data?.map((fav: any) => ({
-          video: fav.video_submissions,
-          category: fav.video_submissions.category as VideoCategory
-        })) || [];
-
-        setFavorites(favoritesData);
-      } else {
-        // Fetch user's submissions
-        const { data, error } = await supabase
-          .from('video_submissions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setSubmissions(data || []);
-      }
+      await Promise.all([fetchFavorites(), fetchSubmissions()]);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchFavorites() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('user_favorites')
+        .select(`
+          submission_id,
+          video_submissions (*)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const favoritesData = data?.map((fav: any) => ({
+        video: fav.video_submissions,
+        category: fav.video_submissions.category as VideoCategory
+      })) || [];
+
+      setFavorites(favoritesData);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  }
+
+  async function fetchSubmissions() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('video_submissions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  }
+
+  async function fetchData() {
+    if (activeTab === 'favorites') {
+      await fetchFavorites();
+    } else {
+      await fetchSubmissions();
     }
   }
 

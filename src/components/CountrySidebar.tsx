@@ -10,6 +10,8 @@ interface CountrySidebarProps {
   onClose: () => void;
   onVideoSelect: (video: VideoSubmission, category: VideoCategory) => void;
   onSubmitClick: () => void;
+  videoCache: VideoSubmission[];
+  videoCacheReady: boolean;
 }
 
 // Color schemes for each category
@@ -61,6 +63,8 @@ export default function CountrySidebar({
   onClose,
   onVideoSelect,
   onSubmitClick,
+  videoCache,
+  videoCacheReady,
 }: CountrySidebarProps) {
   const country = getCountryByCode(countryCode);
   const [videoCounts, setVideoCounts] = useState<Record<VideoCategory, number>>({
@@ -70,7 +74,6 @@ export default function CountrySidebar({
     cooking: 0,
     street_voices: 0,
   });
-  const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile screen size
@@ -85,68 +88,41 @@ export default function CountrySidebar({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Calculate video counts from cache
   useEffect(() => {
-    async function fetchVideoCounts() {
-      try {
-        setLoading(true);
-        const categories: VideoCategory[] = ['inspiration', 'music', 'comedy', 'cooking', 'street_voices'];
+    if (videoCacheReady) {
+      const counts: Record<VideoCategory, number> = {
+        inspiration: 0,
+        music: 0,
+        comedy: 0,
+        cooking: 0,
+        street_voices: 0,
+      };
 
-        const counts: Record<VideoCategory, number> = {
-          inspiration: 0,
-          music: 0,
-          comedy: 0,
-          cooking: 0,
-          street_voices: 0,
-        };
+      // Filter and count videos for this country
+      videoCache
+        .filter(v => v.country_code === countryCode)
+        .forEach(v => {
+          counts[v.category as VideoCategory]++;
+        });
 
-        for (const category of categories) {
-          const { count, error } = await supabase
-            .from('video_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('country_code', countryCode)
-            .eq('category', category)
-            .eq('status', 'approved');
-
-          if (!error && count !== null) {
-            counts[category] = count;
-          }
-        }
-
-        setVideoCounts(counts);
-      } catch (error) {
-        console.error('Error fetching video counts:', error);
-      } finally {
-        setLoading(false);
-      }
+      setVideoCounts(counts);
     }
+  }, [countryCode, videoCache, videoCacheReady]);
 
-    fetchVideoCounts();
-  }, [countryCode]);
+  function handleCategoryClick(category: VideoCategory) {
+    if (!videoCacheReady) return;
 
-  async function handleCategoryClick(category: VideoCategory) {
-    try {
-      // Fetch random approved video for this category
-      const { data, error } = await supabase
-        .from('video_submissions')
-        .select('*')
-        .eq('country_code', countryCode)
-        .eq('category', category)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(10);
+    // Filter cached videos for this country and category
+    const matchingVideos = videoCache.filter(v =>
+      v.country_code === countryCode &&
+      v.category === category
+    );
 
-      if (error) {
-        console.error('Error fetching videos:', error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        // Pick random video from latest 10
-        const randomVideo = data[Math.floor(Math.random() * data.length)];
-        onVideoSelect(randomVideo, category);
-      }
-    } catch (error) {
-      console.error('Error fetching video:', error);
+    if (matchingVideos.length > 0) {
+      // Pick random video from matching videos
+      const randomVideo = matchingVideos[Math.floor(Math.random() * matchingVideos.length)];
+      onVideoSelect(randomVideo, category);
     }
   }
 
@@ -253,7 +229,7 @@ export default function CountrySidebar({
               <button
                 key={category}
                 onClick={() => hasVideos && handleCategoryClick(category)}
-                disabled={!hasVideos || loading}
+                disabled={!hasVideos || !videoCacheReady}
                 style={{
                   width: '100%',
                   textAlign: 'left',
@@ -281,8 +257,8 @@ export default function CountrySidebar({
                       {label}
                     </span>
                   </div>
-                  {loading ? (
-                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>Loading...</span>
+                  {!videoCacheReady ? (
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>...</span>
                   ) : hasVideos ? (
                     <span style={{
                       fontSize: '12px',
