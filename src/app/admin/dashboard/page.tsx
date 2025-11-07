@@ -97,11 +97,11 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Submissions', value: stats.total, icon: '📹', color: 'from-blue-500 to-blue-600' },
-    { label: 'Pending Review', value: stats.pending, icon: '⏳', color: 'from-yellow-500 to-yellow-600' },
-    { label: 'Approved', value: stats.approved, icon: '✅', color: 'from-green-500 to-green-600' },
-    { label: 'Rejected', value: stats.rejected, icon: '❌', color: 'from-red-500 to-red-600' },
-    { label: 'Flagged', value: stats.flagged, icon: '🚩', color: 'from-orange-500 to-orange-600' },
+    { label: 'Total Submissions', value: stats.total, icon: '📹', gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' },
+    { label: 'Pending Review', value: stats.pending, icon: '⏳', gradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)' },
+    { label: 'Approved', value: stats.approved, icon: '✅', gradient: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' },
+    { label: 'Rejected', value: stats.rejected, icon: '❌', gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' },
+    { label: 'Flagged', value: stats.flagged, icon: '🚩', gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' },
   ];
 
   const categoryIcons: Record<VideoCategory, string> = {
@@ -114,78 +114,195 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="p-8">
+      <div style={{ padding: '32px' }}>
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-zinc-400">Overview of all submissions and statistics</p>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+            Dashboard
+          </h1>
+          <p style={{ color: '#a1a1aa' }}>Overview of all submissions and statistics</p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
-            <p className="mt-4 text-zinc-400">Loading statistics...</p>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              border: '2px solid #f59e0b',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              margin: '0 auto',
+              animation: 'spin 1s linear infinite',
+            }}></div>
+            <p style={{ marginTop: '16px', color: '#a1a1aa' }}>Loading statistics...</p>
+            <style jsx>{`
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
           </div>
         ) : (
           <>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '24px',
+              marginBottom: '32px',
+            }}>
               {statCards.map((card) => (
                 <div
                   key={card.label}
-                  className={`bg-gradient-to-br ${card.color} rounded-xl p-6 shadow-lg`}
+                  style={{
+                    background: card.gradient,
+                    borderRadius: '12px',
+                    padding: '24px',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                  }}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-4xl">{card.icon}</span>
-                    <span className="text-3xl font-bold text-white">{card.value}</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '16px',
+                  }}>
+                    <span style={{ fontSize: '36px' }}>{card.icon}</span>
+                    <span style={{ fontSize: '30px', fontWeight: 'bold', color: 'white' }}>
+                      {card.value}
+                    </span>
                   </div>
-                  <h3 className="text-white font-semibold text-sm">{card.label}</h3>
+                  <h3 style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>
+                    {card.label}
+                  </h3>
                 </div>
               ))}
             </div>
 
             {/* Country and Category Stats */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gap: '24px',
+            }}>
               {/* Top Countries */}
-              <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-800">
-                <h2 className="text-xl font-bold text-white mb-6">Top 5 Countries</h2>
-                <div className="space-y-4">
+              <div style={{
+                background: '#18181b',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                border: '1px solid #27272a',
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '24px',
+                }}>
+                  Top 5 Countries
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {stats.byCountry.map((item, idx) => (
-                    <div key={item.country_code} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-amber-500">#{idx + 1}</span>
-                        <span className="text-3xl">{getCountryFlag(item.country_code)}</span>
-                        <span className="text-white font-medium">{getCountryName(item.country_code)}</span>
+                    <div
+                      key={item.country_code}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{
+                          fontSize: '24px',
+                          fontWeight: 'bold',
+                          color: '#f59e0b',
+                        }}>
+                          #{idx + 1}
+                        </span>
+                        <span style={{ fontSize: '28px' }}>{getCountryFlag(item.country_code)}</span>
+                        <span style={{ color: 'white', fontWeight: '500' }}>
+                          {getCountryName(item.country_code)}
+                        </span>
                       </div>
-                      <span className="text-2xl font-bold text-zinc-400">{item.count}</span>
+                      <span style={{
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                        color: '#a1a1aa',
+                      }}>
+                        {item.count}
+                      </span>
                     </div>
                   ))}
                   {stats.byCountry.length === 0 && (
-                    <p className="text-center text-zinc-500 py-8">No submissions yet</p>
+                    <p style={{
+                      textAlign: 'center',
+                      color: '#71717a',
+                      padding: '32px 0',
+                    }}>
+                      No submissions yet
+                    </p>
                   )}
                 </div>
               </div>
 
               {/* Category Distribution */}
-              <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-800">
-                <h2 className="text-xl font-bold text-white mb-6">Submissions by Category</h2>
-                <div className="space-y-4">
+              <div style={{
+                background: '#18181b',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                border: '1px solid #27272a',
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '24px',
+                }}>
+                  Submissions by Category
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {Object.entries(stats.byCategory).map(([category, count]) => (
-                    <div key={category} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{categoryIcons[category as VideoCategory]}</span>
-                        <span className="text-white font-medium">
+                    <div
+                      key={category}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '24px' }}>
+                          {categoryIcons[category as VideoCategory]}
+                        </span>
+                        <span style={{ color: 'white', fontWeight: '500' }}>
                           {CATEGORY_LABELS[category as VideoCategory]}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-32 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full transition-all"
-                            style={{ width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%` }}
-                          />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '128px',
+                          height: '8px',
+                          background: '#27272a',
+                          borderRadius: '999px',
+                          overflow: 'hidden',
+                        }}>
+                          <div style={{
+                            height: '100%',
+                            background: 'linear-gradient(90deg, #f59e0b 0%, #ea580c 100%)',
+                            borderRadius: '999px',
+                            width: `${stats.total > 0 ? (count / stats.total) * 100 : 0}%`,
+                            transition: 'width 0.3s',
+                          }} />
                         </div>
-                        <span className="text-xl font-bold text-zinc-400 w-8 text-right">{count}</span>
+                        <span style={{
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          color: '#a1a1aa',
+                          width: '32px',
+                          textAlign: 'right',
+                        }}>
+                          {count}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -194,53 +311,130 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div style={{
+              marginTop: '32px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '24px',
+            }}>
               <a
                 href="/admin/pending"
-                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500 transition-all group"
+                style={{
+                  background: '#18181b',
+                  border: '1px solid #27272a',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  transition: 'border-color 0.2s',
+                }}
               >
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="text-4xl">⏳</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '12px',
+                }}>
+                  <span style={{ fontSize: '36px' }}>⏳</span>
                   <div>
-                    <h3 className="text-white font-bold text-lg group-hover:text-amber-500 transition-colors">
+                    <h3 style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '18px',
+                    }}>
                       Review Pending
                     </h3>
-                    <p className="text-zinc-400 text-sm">Moderate pending submissions</p>
+                    <p style={{ color: '#a1a1aa', fontSize: '14px' }}>
+                      Moderate pending submissions
+                    </p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-amber-500">{stats.pending} pending</p>
+                <p style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#f59e0b',
+                }}>
+                  {stats.pending} pending
+                </p>
               </a>
 
               <a
                 href="/admin/all"
-                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500 transition-all group"
+                style={{
+                  background: '#18181b',
+                  border: '1px solid #27272a',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  transition: 'border-color 0.2s',
+                }}
               >
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="text-4xl">📹</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '12px',
+                }}>
+                  <span style={{ fontSize: '36px' }}>📹</span>
                   <div>
-                    <h3 className="text-white font-bold text-lg group-hover:text-amber-500 transition-colors">
+                    <h3 style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '18px',
+                    }}>
                       View All
                     </h3>
-                    <p className="text-zinc-400 text-sm">Browse all submissions</p>
+                    <p style={{ color: '#a1a1aa', fontSize: '14px' }}>
+                      Browse all submissions
+                    </p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-amber-500">{stats.total} total</p>
+                <p style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#f59e0b',
+                }}>
+                  {stats.total} total
+                </p>
               </a>
 
               <a
                 href="/admin/rejected"
-                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500 transition-all group"
+                style={{
+                  background: '#18181b',
+                  border: '1px solid #27272a',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  transition: 'border-color 0.2s',
+                }}
               >
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="text-4xl">❌</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '12px',
+                }}>
+                  <span style={{ fontSize: '36px' }}>❌</span>
                   <div>
-                    <h3 className="text-white font-bold text-lg group-hover:text-amber-500 transition-colors">
+                    <h3 style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '18px',
+                    }}>
                       Rejected
                     </h3>
-                    <p className="text-zinc-400 text-sm">Review rejected videos</p>
+                    <p style={{ color: '#a1a1aa', fontSize: '14px' }}>
+                      Review rejected videos
+                    </p>
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-amber-500">{stats.rejected} rejected</p>
+                <p style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#f59e0b',
+                }}>
+                  {stats.rejected} rejected
+                </p>
               </a>
             </div>
           </>
