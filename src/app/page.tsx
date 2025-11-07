@@ -564,46 +564,7 @@ export default function Home() {
                   </h1>
                 </div>
               )}
-              <div style={{ marginTop: isMobile ? '12px' : '0' }}>
-                {/* Map Filter Controls */}
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  alignItems: 'center',
-                  marginBottom: isMobile ? '6px' : '8px',
-                  flexWrap: 'wrap'
-                }}>
-                  <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600 }}>Map:</span>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#374151' }}>
-                    <input
-                      type="radio"
-                      name="mapFilter"
-                      checked={mapFilter === 'all'}
-                      onChange={() => setMapFilter('all')}
-                    />
-                    All Videos
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: profileData ? '#374151' : '#9ca3af' }}>
-                    <input
-                      type="radio"
-                      name="mapFilter"
-                      checked={mapFilter === 'favorites'}
-                      onChange={() => profileData && setMapFilter('favorites')}
-                      disabled={!profileData}
-                    />
-                    Only Favorites
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: profileData ? '#374151' : '#9ca3af' }}>
-                    <input
-                      type="radio"
-                      name="mapFilter"
-                      checked={mapFilter === 'mine'}
-                      onChange={() => profileData && setMapFilter('mine')}
-                      disabled={!profileData}
-                    />
-                    My Submissions
-                  </label>
-                </div>
+      <div style={{ marginTop: isMobile ? '12px' : '0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px' }}>
                   <button
                     onClick={() => handleCategoryClick('inspiration')}
@@ -855,6 +816,8 @@ export default function Home() {
           }}
           onEditSubmission={handleEditSubmission}
           initialData={profileData}
+          mapFilter={mapFilter}
+          onChangeMapFilter={(f) => setMapFilter(f)}
         />
       )}
 
