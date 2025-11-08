@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import WorldMap from '@/components/WorldMap';
 import CountrySidebar from '@/components/CountrySidebar';
@@ -9,6 +9,7 @@ import AuthModal from '@/components/AuthModal';
 import SubmissionForm from '@/components/SubmissionForm';
 import ProfileModal from '@/components/ProfileModal';
 import CategoryPicker from '@/components/CategoryPicker';
+import CategoryInfoCard from '@/components/CategoryInfoCard';
 import type { VideoSubmission, VideoCategory } from '@/types';
 
 export default function Home() {
@@ -42,6 +43,9 @@ export default function Home() {
     favorites: false,
     mine: false,
   });
+  const pendingSubmissionCountryRef = useRef<string | null>(null);
+  const [showCategoryInfo, setShowCategoryInfo] = useState(false);
+  const [categoryInfoCategory, setCategoryInfoCategory] = useState<VideoCategory>('inspiration');
 
   // Set of countries that currently have at least one approved video
   const countriesWithVideos = useMemo(() => {
@@ -100,6 +104,15 @@ export default function Home() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user && pendingSubmissionCountryRef.current) {
+      const countryCode = pendingSubmissionCountryRef.current;
+      pendingSubmissionCountryRef.current = null;
+      setSelectedCountry(isMobile ? countryCode : null);
+      setShowSubmissionForm(true);
+    }
+  }, [user, isMobile]);
 
   // Preload profile data when user logs in
   async function preloadProfileData(userId: string) {
@@ -218,10 +231,9 @@ export default function Home() {
     setPickerCountry(null);
 
     if (!videoCacheReady) {
-      // Wait until cache is ready to avoid false "no videos". Show a quick toast.
-      setToastMessage({ title: 'Loading', description: 'Fetching latest videos…' });
+      setToastMessage({ title: 'Loading videos', description: 'Fetching latest content…' });
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 1500);
+      setTimeout(() => setShowToast(false), 2000);
       return;
     }
 
@@ -231,9 +243,21 @@ export default function Home() {
       // Do not alter sidebar selection for this flow
       setSelectedCountry(null);
     } else {
-      // No videos for this country: open submission form prefilled to this country
-      setSelectedCountry(countryCode);
-      setShowSubmissionForm(true);
+      // No videos for this country
+      if (user) {
+        setSelectedCountry(isMobile ? countryCode : null);
+        setShowSubmissionForm(true);
+      } else {
+        pendingSubmissionCountryRef.current = countryCode;
+        setAuthMode('signup');
+        setShowAuthModal(true);
+        setToastMessage({
+          title: 'Help add videos',
+          description: 'Sign up to add native-language content for this country.',
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2600);
+      }
     }
     console.log('Country selected (auto-play if available):', countryCode);
   }
@@ -334,6 +358,15 @@ export default function Home() {
     }
   }
 
+  function handleGlobalCategoryClick(category: VideoCategory) {
+    if (selectedCountry) {
+      handleCategoryClick(category);
+    } else {
+      setCategoryInfoCategory(category);
+      setShowCategoryInfo(true);
+    }
+  }
+
   function handleSubmitClick() {
     // Allow submissions without login
     setShowSubmissionForm(true);
@@ -390,17 +423,22 @@ export default function Home() {
           <div className="h-full flex flex-col" style={{ padding: isMobile ? '16px 24px' : '32px' }}>
             {/* Header - Logo and Auth Links */}
             {isMobile ? (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h1 style={{
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: '#000000',
-                  letterSpacing: '-0.02em',
-                  margin: 0
-                }}>
-                  🌍 CULTURIA
-                </h1>
-                <div style={{ display: 'flex', gap: '16px', fontSize: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div>
+                  <h1 style={{
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    margin: 0,
+                    background: 'linear-gradient(120deg, #f97316, #fb923c)',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent'
+                  }}>
+                    🌍 CULTURIA
+                  </h1>
+                  <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>Native-language videos worldwide</p>
+                </div>
+                <div style={{ display: 'flex', gap: '14px', fontSize: '13px' }}>
                   {!user ? (
                     <>
                       <button
@@ -608,163 +646,59 @@ export default function Home() {
             )}
 
             {/* Main Content */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: isMobile ? '0px' : '80px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: isMobile ? '8px' : '60px' }}>
               {!isMobile && (
                 <div>
                   <h1 style={{
                     fontSize: '32px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '12px',
-                    letterSpacing: '-0.02em'
+                    fontWeight: 700,
+                    marginBottom: '6px',
+                    letterSpacing: '-0.02em',
+                    background: 'linear-gradient(120deg, #f97316, #fb923c)',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent'
                   }}>
                     🌍 CULTURIA
                   </h1>
+                  <p style={{ fontSize: '13px', color: '#6b7280' }}>Native-language content from every country</p>
                 </div>
               )}
-      <div style={{ marginTop: isMobile ? '12px' : '0' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px' }}>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : '1fr',
+                gap: isMobile ? '10px' : '8px'
+              }}>
+                {([
+                  { key: 'inspiration', icon: '💡', label: 'Inspiration' },
+                  { key: 'music', icon: '🎵', label: 'Music' },
+                  { key: 'comedy', icon: '😄', label: 'Comedy' },
+                  { key: 'cooking', icon: '🍳', label: 'Cooking' },
+                  { key: 'street_voices', icon: '🎤', label: 'Street Voices' },
+                ] as { key: VideoCategory; icon: string; label: string }[]).map(({ key, icon, label }) => (
                   <button
-                    onClick={() => handleCategoryClick('inspiration')}
+                    key={key}
+                    onClick={() => handleGlobalCategoryClick(key)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
                       gap: '12px',
-                      fontSize: '14px',
-                      color: '#000000',
-                      border: 'none',
-                      backgroundColor: 'transparent',
+                      padding: '12px 16px',
+                      borderRadius: '14px',
+                      border: '1px solid rgba(145, 152, 171, 0.3)',
+                      background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
                       cursor: 'pointer',
-                      padding: isMobile ? '6px 12px' : '8px 12px',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s',
-                      width: '100%',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 22px rgba(15, 23, 42, 0.12)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 18px rgba(15, 23, 42, 0.08)'; }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px' }}>💡</span> Inspiration
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                      {categoryCounts.inspiration}
-                    </span>
+                    <span style={{ fontSize: '20px' }}>{icon}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{label}</span>
                   </button>
-                  <button
-                    onClick={() => handleCategoryClick('music')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      fontSize: '14px',
-                      color: '#000000',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      cursor: 'pointer',
-                      padding: isMobile ? '6px 12px' : '8px 12px',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s',
-                      width: '100%',
-                      textAlign: 'left'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px' }}>🎵</span> Music
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                      {categoryCounts.music}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => handleCategoryClick('comedy')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      fontSize: '14px',
-                      color: '#000000',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      cursor: 'pointer',
-                      padding: isMobile ? '6px 12px' : '8px 12px',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s',
-                      width: '100%',
-                      textAlign: 'left'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px' }}>😄</span> Comedy
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                      {categoryCounts.comedy}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => handleCategoryClick('cooking')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      fontSize: '14px',
-                      color: '#000000',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      cursor: 'pointer',
-                      padding: isMobile ? '6px 12px' : '8px 12px',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s',
-                      width: '100%',
-                      textAlign: 'left'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px' }}>🍳</span> Cooking
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                      {categoryCounts.cooking}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => handleCategoryClick('street_voices')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      fontSize: '14px',
-                      color: '#000000',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      cursor: 'pointer',
-                      padding: isMobile ? '6px 12px' : '8px 12px',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s',
-                      width: '100%',
-                      textAlign: 'left'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '20px' }}>🎤</span> Street Voices
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                      {categoryCounts.street_voices}
-                    </span>
-                  </button>
-                </div>
+                ))}
               </div>
               {/* Footer - Subtitle and Links */}
               <div style={{ marginTop: isMobile ? '60px' : '0', paddingBottom: isMobile ? '24px' : '0' }}>
@@ -908,6 +842,15 @@ export default function Home() {
           initialData={profileData}
           mapSources={mapSources}
           onToggleMapSource={(key, value) => setMapSources((prev) => ({ ...prev, [key]: value }))}
+        />
+      )}
+
+      {/* Category Info Modal */}
+      {showCategoryInfo && (
+        <CategoryInfoCard
+          activeCategory={categoryInfoCategory}
+          onChangeCategory={(cat) => setCategoryInfoCategory(cat)}
+          onClose={() => setShowCategoryInfo(false)}
         />
       )}
 

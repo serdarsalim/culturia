@@ -220,67 +220,57 @@ export default function CountrySidebar({
         backgroundColor: '#f3f4f6'
       }}>
         {isMobile ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
               const count = videoCounts[category];
               const hasVideos = count > 0;
+              const colors = CATEGORY_COLORS[category];
               return (
                 <button
                   key={category}
                   onClick={() => hasVideos && handleCategoryClick(category)}
                   disabled={!hasVideos || !videoCacheReady}
                   style={{
-                    padding: '10px 18px',
-                    borderRadius: '12px',
-                    border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
-                    backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
-                    cursor: hasVideos ? 'pointer' : 'not-allowed',
-                    opacity: hasVideos ? 1 : 0.5,
-                    transition: 'all 0.2s',
+                    width: '100%',
                     textAlign: 'left',
+                    padding: '14px 16px',
+                    borderRadius: '12px',
+                    border: hasVideos ? '1px solid rgba(148, 163, 184, 0.4)' : '1px solid rgba(226, 232, 240, 0.8)',
+                    backgroundColor: hasVideos ? '#ffffff' : '#f8fafc',
+                    cursor: hasVideos ? 'pointer' : 'not-allowed',
+                    opacity: hasVideos ? 1 : 0.45,
+                    transition: 'all 0.2s',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '20px' }}>{CATEGORY_COLORS[category].icon}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#000000' }}>{label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '20px' }}>{colors.icon}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{label}</span>
                   </div>
-                  {!videoCacheReady ? (
-                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>…</span>
-                  ) : hasVideos ? (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>{count}</span>
-                  ) : (
-                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>0</span>
-                  )}
+                  <span style={{ fontSize: '18px', color: hasVideos ? '#94a3b8' : '#cbd5f5' }}>→</span>
                 </button>
               );
             })}
 
-            {/* 6th tile: Submit Videos */}
             <button
               onClick={onSubmitClick}
               style={{
-                padding: '10px 18px',
+                width: '100%',
+                marginTop: '8px',
+                padding: '14px 16px',
+                fontSize: '14px',
+                fontWeight: '600',
                 borderRadius: '12px',
-                border: '1px solid #fed7aa',
-                background: '#fff7ed',
-                color: '#9a3412',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                background: 'linear-gradient(120deg, #fb923c, #f97316)',
+                color: '#ffffff',
+                border: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s'
+                boxShadow: '0 8px 18px rgba(249, 115, 22, 0.25)'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#ffedd5'; e.currentTarget.style.border = '1px solid #fdba74'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#fff7ed'; e.currentTarget.style.border = '1px solid #fed7aa'; }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>＋</span>
-                <span style={{ fontSize: '14px', fontWeight: 700 }}>Submit Videos</span>
-              </div>
+              Submit Videos
             </button>
           </div>
         ) : (
@@ -298,10 +288,10 @@ export default function CountrySidebar({
                     style={{
                       width: '100%',
                       textAlign: 'left',
-                      padding: '14px 16px',
+                      padding: '14px 18px',
                       borderRadius: '8px',
-                      border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
-                      backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
+                      border: hasVideos ? '1px solid rgba(148, 163, 184, 0.4)' : '1px solid #f3f4f6',
+                      backgroundColor: hasVideos ? '#ffffff' : '#f8fafc',
                       cursor: hasVideos ? 'pointer' : 'not-allowed',
                       opacity: hasVideos ? 1 : 0.5,
                       transition: 'all 0.2s'
@@ -312,13 +302,7 @@ export default function CountrySidebar({
                         <span style={{ fontSize: '22px' }}>{colors.icon}</span>
                         <span style={{ fontSize: '14px', fontWeight: 500, color: '#000000' }}>{label}</span>
                       </div>
-                      {!videoCacheReady ? (
-                        <span style={{ fontSize: '12px', color: '#9ca3af' }}>...</span>
-                      ) : hasVideos ? (
-                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#6b7280' }}>{count}</span>
-                      ) : (
-                        <span style={{ fontSize: '12px', color: '#9ca3af' }}>0</span>
-                      )}
+                      <span style={{ fontSize: '18px', color: hasVideos ? '#94a3b8' : '#cbd5f5' }}>→</span>
                     </div>
                   </button>
                 );
