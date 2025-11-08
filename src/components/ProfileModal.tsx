@@ -34,6 +34,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
   const [profileLoading, setProfileLoading] = useState(false);
   const [usernameError, setUsernameError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Detect mobile
   useEffect(() => {
@@ -152,8 +153,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
     }
   }
 
-  async function handleSaveProfile() {
-    setProfileLoading(true);
+  // Autosave profile with debounce
+  async function autoSaveProfile() {
     setUsernameError('');
 
     try {
@@ -163,13 +164,11 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
       // Validate username format
       if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
         setUsernameError('Username can only contain letters, numbers, and underscores');
-        setProfileLoading(false);
         return;
       }
 
       if (username && username.length < 3) {
         setUsernameError('Username must be at least 3 characters');
-        setProfileLoading(false);
         return;
       }
 
@@ -187,30 +186,45 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
         } else {
           throw error;
         }
-        setProfileLoading(false);
         return;
       }
 
+      // Success toast
       setToastMessage({
-        title: 'Profile Updated',
-        description: 'Your profile has been saved successfully',
+        title: 'Saved',
+        description: 'Profile updated',
         type: 'success'
       });
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 2000);
     } catch (error) {
       console.error('Error saving profile:', error);
       setToastMessage({
-        title: 'Failed to Save',
-        description: 'Please try again later',
+        title: 'Save Failed',
+        description: 'Please try again',
         type: 'error'
       });
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-    } finally {
-      setProfileLoading(false);
     }
   }
+
+  // Debounced autosave on field changes
+  useEffect(() => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      autoSaveProfile();
+    }, 1000); // Save 1 second after user stops typing
+
+    setSaveTimeout(timeout);
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [username, displayName]);
 
   async function handleDeleteSubmission(id: string) {
     if (!confirm('Are you sure you want to delete this submission?')) return;
@@ -247,9 +261,9 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
 
   function renderStatusBadge(status: string) {
     const statusConfig = {
-      pending: { text: 'Pending', bg: '#fef3c7', color: '#92400e' },
-      approved: { text: 'Approved', bg: '#d1fae5', color: '#065f46' },
-      rejected: { text: 'Rejected', bg: '#fee2e2', color: '#991b1b' }
+      pending: { text: 'Pending', icon: '⏳', bg: '#fef3c7', color: '#92400e' },
+      approved: { text: 'Approved', icon: '✓', bg: '#d1fae5', color: '#065f46' },
+      rejected: { text: 'Rejected', icon: '✕', bg: '#fee2e2', color: '#991b1b' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -257,14 +271,14 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
     return (
       <span style={{
         display: 'inline-block',
-        padding: '4px 10px',
+        padding: isMobile ? '6px 8px' : '4px 10px',
         borderRadius: '6px',
         backgroundColor: config.bg,
         color: config.color,
-        fontSize: '12px',
+        fontSize: isMobile ? '16px' : '12px',
         fontWeight: '600'
       }}>
-        {config.text}
+        {isMobile ? config.icon : config.text}
       </span>
     );
   }
@@ -325,10 +339,6 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
           ✕
         </button>
 
-        {/* Header */}
-        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '16px', flexShrink: 0 }}>
-          My Profile
-        </h2>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', marginBottom: '16px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
@@ -462,8 +472,16 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                     {/* Submissions list for country */}
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       {vids.map((video) => (
-                        <div key={video.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '12px 16px', borderTop: '1px solid #f3f4f6' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <div key={video.id} style={{
+                          display: 'flex',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          alignItems: isMobile ? 'flex-start' : 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          borderTop: '1px solid #f3f4f6'
+                        }}>
+                          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? '4px' : '10px', flex: 1 }}>
                             <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600 }}>
                               {CATEGORY_LABELS[video.category as VideoCategory]}
                             </span>
@@ -476,7 +494,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                                 fontSize: '14px',
                                 fontWeight: 600,
                                 cursor: 'pointer',
-                                padding: 0
+                                padding: 0,
+                                textAlign: 'left'
                               }}
                             >
                               {video.title || 'Untitled'}
@@ -489,38 +508,44 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                                 onClose();
                               }}
                               style={{
-                                padding: '6px 12px',
+                                padding: isMobile ? '8px' : '6px 12px',
                                 borderRadius: '8px',
                                 backgroundColor: '#ffffff',
                                 border: '1px solid #d1d5db',
                                 color: '#374151',
-                                fontSize: '12px',
+                                fontSize: isMobile ? '16px' : '12px',
                                 fontWeight: '600',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                               }}
                               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                              title="Edit"
                             >
-                              Edit
+                              {isMobile ? '✏️' : 'Edit'}
                             </button>
                             <button
-                              onClick={() => handleDeleteSubmission(video.id)}
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this submission?')) {
+                                  handleDeleteSubmission(video.id);
+                                }
+                              }}
                               style={{
-                                padding: '6px 12px',
+                                padding: isMobile ? '8px' : '6px 12px',
                                 borderRadius: '8px',
                                 backgroundColor: '#ffffff',
                                 border: '1px solid #fee2e2',
                                 color: '#ef4444',
-                                fontSize: '12px',
+                                fontSize: isMobile ? '16px' : '12px',
                                 fontWeight: '600',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                               }}
                               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fee2e2'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+                              title="Delete"
                             >
-                              Delete
+                              {isMobile ? '🗑️' : 'Delete'}
                             </button>
                             {/* Right-aligned status badge */}
                             {renderStatusBadge(video.status)}
@@ -539,95 +564,72 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Profile Information</h3>
                 <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '8px' : '12px' }}>Customize your public profile</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px', maxWidth: isMobile ? '100%' : '400px' }}>
-                  {/* Display Name */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Your full name"
-                      maxLength={100}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        fontSize: '14px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '8px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        outline: 'none'
-                      }}
-                    />
-                    <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                      Your name as it appears to others
-                    </p>
-                  </div>
-
-                  {/* Username */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => {
-                        setUsername(e.target.value);
-                        setUsernameError('');
-                      }}
-                      placeholder="your_username"
-                      maxLength={30}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        fontSize: '14px',
-                        border: `1px solid ${usernameError ? '#ef4444' : '#d1d5db'}`,
-                        borderRadius: '8px',
-                        backgroundColor: '#ffffff',
-                        color: '#000000',
-                        outline: 'none'
-                      }}
-                    />
-                    {usernameError ? (
-                      <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                        {usernameError}
-                      </p>
-                    ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px', maxWidth: '100%' }}>
+                  {/* Display Name and Username - 2 column grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '8px' : '12px' }}>
+                    {/* Display Name */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                        Display Name
+                      </label>
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Your full name"
+                        maxLength={100}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          fontSize: '14px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          backgroundColor: '#ffffff',
+                          color: '#000000',
+                          outline: 'none'
+                        }}
+                      />
                       <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                        Letters, numbers, and underscores only (min 3 chars)
+                        Your name
                       </p>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* Save Button */}
-                  <button
-                    onClick={handleSaveProfile}
-                    disabled={profileLoading}
-                    style={{
-                      padding: '10px 20px',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#ffffff',
-                      backgroundColor: profileLoading ? '#9ca3af' : '#f97316',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: profileLoading ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.2s',
-                      alignSelf: 'flex-start'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!profileLoading) e.currentTarget.style.backgroundColor = '#ea580c';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!profileLoading) e.currentTarget.style.backgroundColor = '#f97316';
-                    }}
-                  >
-                    {profileLoading ? 'Saving...' : 'Save Profile'}
-                  </button>
+                    {/* Username */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          setUsernameError('');
+                        }}
+                        placeholder="your_username"
+                        maxLength={30}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          fontSize: '14px',
+                          border: `1px solid ${usernameError ? '#ef4444' : '#d1d5db'}`,
+                          borderRadius: '8px',
+                          backgroundColor: '#ffffff',
+                          color: '#000000',
+                          outline: 'none'
+                        }}
+                      />
+                      {usernameError ? (
+                        <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                          {usernameError}
+                        </p>
+                      ) : (
+                        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                          Min 3 chars
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
