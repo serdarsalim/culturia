@@ -325,16 +325,31 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               display: 'flex',
               alignItems: 'center',
               gap: isMobile ? '6px' : '8px',
-              marginBottom: isMobile ? '4px' : '8px'
+              marginBottom: isMobile ? '4px' : '8px',
+              flexWrap: 'nowrap',
+              overflow: 'hidden'
             }}>
               <span style={{ fontSize: isMobile ? '18px' : '24px' }}>{getCountryFlag(video.country_code)}</span>
-              <span style={{ fontWeight: '600', fontSize: isMobile ? '14px' : '16px' }}>{getCountryName(video.country_code)}</span>
+              <span style={{ fontWeight: 600, fontSize: isMobile ? '14px' : '16px' }}>{getCountryName(video.country_code)}</span>
               <span style={{ color: '#9ca3af', fontSize: isMobile ? '12px' : '14px' }}>•</span>
               <span style={{ color: '#d1d5db', fontSize: isMobile ? '13px' : '14px' }}>{CATEGORY_LABELS[category]}</span>
+              {video.title && (
+                <>
+                  <span style={{ color: '#9ca3af', fontSize: isMobile ? '12px' : '14px' }}>•</span>
+                  <span style={{
+                    color: '#d1d5db',
+                    fontSize: isMobile ? '13px' : '14px',
+                    fontWeight: 600,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {video.title}
+                  </span>
+                </>
+              )}
             </div>
-            {video.title && (
-              <p style={{ fontSize: isMobile ? '12px' : '14px', color: '#d1d5db', margin: 0 }}>{video.title}</p>
-            )}
           </div>
 
           <div style={{
@@ -434,6 +449,9 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
           </div>
         </div>
 
+        {/* Divider above category pills */}
+        <div style={{ height: '1px', backgroundColor: '#111827', opacity: 1, marginTop: '8px' }} />
+
         {/* Category pills (all viewports) */}
         {categoryCounts && onChangeCategory && (
           <div style={{
@@ -441,7 +459,8 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
             display: 'flex',
             gap: '8px',
             overflowX: 'auto',
-            padding: '4px 2px'
+            padding: '4px 2px',
+            justifyContent: 'center'
           }}>
             {(['inspiration','music','comedy','cooking','street_voices'] as VideoCategory[]).map((cat) => {
               const count = categoryCounts[cat] || 0;
@@ -463,21 +482,12 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                     fontSize: '12px',
                     fontWeight: 600,
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    alignItems: 'center'
                   }}
                   aria-pressed={active}
-                  title={CATEGORY_LABELS[cat] + ' • ' + count}
+                  title={CATEGORY_LABELS[cat]}
                 >
-                  <span>{CATEGORY_LABELS[cat]}</span>
-                  <span style={{
-                    padding: '0 6px',
-                    borderRadius: '9999px',
-                    background: active ? '#334155' : '#1f2937',
-                    color: '#e5e7eb',
-                    fontSize: '11px',
-                    fontWeight: 700
-                  }}>{count}</span>
+                  {CATEGORY_LABELS[cat]}
                 </button>
               );
             })}
