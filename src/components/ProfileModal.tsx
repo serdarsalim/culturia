@@ -641,7 +641,12 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               <div>
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Map Visibility</h3>
                 <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '6px' : '8px' }}>Choose what the map highlights. You can select multiple.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', maxWidth: '360px' }}>
+                <div style={{
+                  display: isMobile ? 'flex' : 'grid',
+                  flexDirection: isMobile ? 'column' : undefined,
+                  gridTemplateColumns: isMobile ? undefined : 'repeat(3, 1fr)',
+                  gap: isMobile ? '6px' : '8px'
+                }}>
                   {([
                     { key: 'all', label: 'All approved videos', desc: 'Public, approved content' },
                     { key: 'favorites', label: 'My favorites', desc: 'Places you starred', requiresAuth: true },
