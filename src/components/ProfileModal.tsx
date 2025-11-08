@@ -33,6 +33,15 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
   const [displayName, setDisplayName] = useState('');
   const [profileLoading, setProfileLoading] = useState(false);
   const [usernameError, setUsernameError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch both favorites and submissions on mount only if no initial data
   useEffect(() => {
@@ -276,12 +285,13 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
         borderRadius: '16px',
         maxWidth: '900px',
         width: '100%',
-        maxHeight: '90vh',
-        padding: '32px',
+        maxHeight: isMobile ? '85vh' : '90vh',
+        padding: isMobile ? '24px 20px' : '32px',
         position: 'relative',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        overflow: 'hidden'
       }} onClick={(e) => e.stopPropagation()}>
 
         {/* Close Button */}
@@ -321,7 +331,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
         </h2>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <button
             onClick={() => setActiveTab('favorites')}
             style={{
@@ -336,7 +346,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            Favorites
+            ❤️ Favorites
           </button>
           <button
             onClick={() => setActiveTab('submissions')}
@@ -352,7 +362,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            My Submissions
+            📤 My Submissions
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -368,7 +378,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            Settings
+            ⚙️ Settings
           </button>
         </div>
 
@@ -520,13 +530,13 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               </div>
             )
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Profile Settings */}
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Profile Information</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '16px' }}>Customize your public profile</p>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Profile Information</h3>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>Customize your public profile</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '400px' }}>
                   {/* Display Name */}
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
@@ -620,9 +630,9 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
 
               {/* Map Visibility */}
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Map Visibility</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>Choose what the map highlights. You can select multiple.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '360px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Map Visibility</h3>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>Choose what the map highlights. You can select multiple.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '360px' }}>
                   {([
                     { key: 'all', label: 'All approved videos', desc: 'Public, approved content' },
                     { key: 'favorites', label: 'My favorites', desc: 'Places you starred', requiresAuth: true },
@@ -672,8 +682,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               </div>
 
               {/* Account Actions */}
-              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '24px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '12px' }}>Account</h3>
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Account</h3>
                 <button
                   onClick={async () => {
                     await supabase.auth.signOut();
