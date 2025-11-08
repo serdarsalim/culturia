@@ -362,7 +362,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            📤 My Submissions
+            📤 Submissions
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -530,13 +530,13 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               </div>
             )
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px' }}>
               {/* Profile Settings */}
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Profile Information</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>Customize your public profile</p>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Profile Information</h3>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '8px' : '12px' }}>Customize your public profile</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '400px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px', maxWidth: '400px' }}>
                   {/* Display Name */}
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
@@ -630,9 +630,9 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
 
               {/* Map Visibility */}
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Map Visibility</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>Choose what the map highlights. You can select multiple.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '360px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Map Visibility</h3>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '6px' : '8px' }}>Choose what the map highlights. You can select multiple.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px', maxWidth: '360px' }}>
                   {([
                     { key: 'all', label: 'All approved videos', desc: 'Public, approved content' },
                     { key: 'favorites', label: 'My favorites', desc: 'Places you starred', requiresAuth: true },
@@ -682,8 +682,8 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               </div>
 
               {/* Account Actions */}
-              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>Account</h3>
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: isMobile ? '12px' : '16px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '6px' : '8px' }}>Account</h3>
                 <button
                   onClick={async () => {
                     await supabase.auth.signOut();
