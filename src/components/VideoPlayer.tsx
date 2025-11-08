@@ -287,7 +287,8 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
         {/* Video Container */}
         <div style={{
           position: 'relative',
-          backgroundColor: '#000000',
+          // Slightly lighter than card to restore visible frame/border
+          backgroundColor: '#0a0a0a',
           borderRadius: '12px',
           overflow: 'hidden',
           aspectRatio: '16/9',
