@@ -52,6 +52,15 @@ export default function Home() {
   const countriesWithVideos = useMemo(() => {
     const set = new Set<string>();
 
+    // If "My submissions" is enabled, show ONLY user's submissions
+    if (mapSources.mine && profileData) {
+      for (const sub of profileData.submissions) {
+        if (sub.country_code) set.add(sub.country_code);
+      }
+      return set; // Return early, ignore other sources
+    }
+
+    // Otherwise combine "All videos" and "My favorites"
     if (mapSources.all && videoCacheReady) {
       for (const v of videoCache) {
         if (v.country_code) set.add(v.country_code);
@@ -60,11 +69,6 @@ export default function Home() {
     if (mapSources.favorites && profileData) {
       for (const fav of profileData.favorites) {
         if (fav.video?.country_code) set.add(fav.video.country_code);
-      }
-    }
-    if (mapSources.mine && profileData) {
-      for (const sub of profileData.submissions) {
-        if (sub.country_code) set.add(sub.country_code);
       }
     }
 
