@@ -216,96 +216,141 @@ export default function CountrySidebar({
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: isMobile ? '16px 24px' : '24px 32px',
+        padding: isMobile ? '12px 16px' : '24px 32px',
         backgroundColor: '#f3f4f6'
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '6px' : '8px' }}>
-          {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
-            const count = videoCounts[category];
-            const hasVideos = count > 0;
-            const colors = CATEGORY_COLORS[category];
-
-            return (
-              <button
-                key={category}
-                onClick={() => hasVideos && handleCategoryClick(category)}
-                disabled={!hasVideos || !videoCacheReady}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: isMobile ? '10px 14px' : '14px 16px',
-                  borderRadius: '8px',
-                  border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
-                  backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
-                  cursor: hasVideos ? 'pointer' : 'not-allowed',
-                  opacity: hasVideos ? 1 : 0.5,
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '12px' }}>
-                    <span style={{ fontSize: isMobile ? '20px' : '22px' }}>{colors.icon}</span>
-                    <span style={{
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#000000'
-                    }}>
-                      {label}
-                    </span>
+        {isMobile ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '8px' }}>
+            {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
+              const count = videoCounts[category];
+              const hasVideos = count > 0;
+              return (
+                <button
+                  key={category}
+                  onClick={() => hasVideos && handleCategoryClick(category)}
+                  disabled={!hasVideos || !videoCacheReady}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '12px',
+                    border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
+                    backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
+                    cursor: hasVideos ? 'pointer' : 'not-allowed',
+                    opacity: hasVideos ? 1 : 0.5,
+                    transition: 'all 0.2s',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '20px' }}>{CATEGORY_COLORS[category].icon}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#000000' }}>{label}</span>
                   </div>
                   {!videoCacheReady ? (
-                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>...</span>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>…</span>
                   ) : hasVideos ? (
-                    <span style={{
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      color: '#6b7280'
-                    }}>
-                      {count}
-                    </span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>{count}</span>
                   ) : (
                     <span style={{ fontSize: '12px', color: '#9ca3af' }}>0</span>
                   )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                </button>
+              );
+            })}
 
-        {/* Submit Button */}
-        <button
-          onClick={onSubmitClick}
-          style={{
-            width: '100%',
-            marginTop: '24px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '500',
-            borderRadius: '8px',
-            backgroundColor: '#f97316',
-            color: '#ffffff',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-        >
-          Submit Videos
-        </button>
+            {/* 6th tile: Submit Videos */}
+            <button
+              onClick={onSubmitClick}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '12px',
+                border: '1px solid #fed7aa',
+                background: '#fff7ed',
+                color: '#9a3412',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#ffedd5'; e.currentTarget.style.border = '1px solid #fdba74'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#fff7ed'; e.currentTarget.style.border = '1px solid #fed7aa'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '20px' }}>＋</span>
+                <span style={{ fontSize: '14px', fontWeight: 700 }}>Submit Videos</span>
+              </div>
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
+                const count = videoCounts[category];
+                const hasVideos = count > 0;
+                const colors = CATEGORY_COLORS[category];
+                return (
+                  <button
+                    key={category}
+                    onClick={() => hasVideos && handleCategoryClick(category)}
+                    disabled={!hasVideos || !videoCacheReady}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '14px 16px',
+                      borderRadius: '8px',
+                      border: hasVideos ? '1px solid #e5e7eb' : '1px solid #f3f4f6',
+                      backgroundColor: hasVideos ? '#ffffff' : '#f9fafb',
+                      cursor: hasVideos ? 'pointer' : 'not-allowed',
+                      opacity: hasVideos ? 1 : 0.5,
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '22px' }}>{colors.icon}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#000000' }}>{label}</span>
+                      </div>
+                      {!videoCacheReady ? (
+                        <span style={{ fontSize: '12px', color: '#9ca3af' }}>...</span>
+                      ) : hasVideos ? (
+                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#6b7280' }}>{count}</span>
+                      ) : (
+                        <span style={{ fontSize: '12px', color: '#9ca3af' }}>0</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Info Text */}
-        <p style={{
-          marginTop: '12px',
-          fontSize: '12px',
-          textAlign: 'center',
-          color: '#6b7280',
-          lineHeight: '1.5'
-        }}>
-          Help build our cultural library by submitting videos
-        </p>
+            {/* Submit Button (desktop) */}
+            <button
+              onClick={onSubmitClick}
+              style={{
+                width: '100%',
+                marginTop: '24px',
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontWeight: '500',
+                borderRadius: '8px',
+                backgroundColor: '#f97316',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Submit Videos
+            </button>
+
+            {/* Info Text */}
+            <p style={{ marginTop: '12px', fontSize: '12px', textAlign: 'center', color: '#6b7280', lineHeight: '1.5' }}>
+              Help build our cultural library by submitting videos
+            </p>
+          </>
+        )}
       </div>
 
       <style jsx>{`
