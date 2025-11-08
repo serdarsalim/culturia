@@ -223,7 +223,8 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
         position: 'fixed',
         inset: 0,
         zIndex: 120,
-        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        // Flip colors: use modal's darker grey on the backdrop
+        backgroundColor: 'rgba(26, 26, 26, 0.95)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -236,7 +237,8 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
         style={{
           width: '100%',
           maxWidth: '1024px',
-          backgroundColor: '#1a1a1a',
+          // Flip colors: make the modal card darker than the backdrop
+          backgroundColor: '#000000',
           borderRadius: isMobile ? '12px' : '16px',
           padding: isMobile ? '16px' : '24px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
