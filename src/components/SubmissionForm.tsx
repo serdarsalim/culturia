@@ -269,7 +269,7 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
     <div style={{
       position: 'fixed',
       inset: 0,
-      zIndex: 60,
+      zIndex: 140,
       backgroundColor: 'rgba(0, 0, 0, 0.75)',
       display: 'flex',
       alignItems: 'center',
