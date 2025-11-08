@@ -331,54 +331,57 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
         </h2>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', marginBottom: '16px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <button
             onClick={() => setActiveTab('favorites')}
             style={{
-              padding: '12px 24px',
-              fontSize: '15px',
+              padding: isMobile ? '10px 12px' : '12px 24px',
+              fontSize: isMobile ? '14px' : '15px',
               fontWeight: '600',
               color: activeTab === 'favorites' ? '#f97316' : '#6b7280',
               backgroundColor: 'transparent',
               border: 'none',
               borderBottom: activeTab === 'favorites' ? '2px solid #f97316' : '2px solid transparent',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              flex: isMobile ? 1 : 'initial'
             }}
           >
-            ❤️ Favorites
+            {isMobile ? '❤️' : '❤️ Favorites'}
           </button>
           <button
             onClick={() => setActiveTab('submissions')}
             style={{
-              padding: '12px 24px',
-              fontSize: '15px',
+              padding: isMobile ? '10px 12px' : '12px 24px',
+              fontSize: isMobile ? '14px' : '15px',
               fontWeight: '600',
               color: activeTab === 'submissions' ? '#f97316' : '#6b7280',
               backgroundColor: 'transparent',
               border: 'none',
               borderBottom: activeTab === 'submissions' ? '2px solid #f97316' : '2px solid transparent',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              flex: isMobile ? 1 : 'initial'
             }}
           >
-            📤 Submissions
+            {isMobile ? '📤' : '📤 Submissions'}
           </button>
           <button
             onClick={() => setActiveTab('settings')}
             style={{
-              padding: '12px 24px',
-              fontSize: '15px',
+              padding: isMobile ? '10px 12px' : '12px 24px',
+              fontSize: isMobile ? '14px' : '15px',
               fontWeight: '600',
               color: activeTab === 'settings' ? '#f97316' : '#6b7280',
               backgroundColor: 'transparent',
               border: 'none',
               borderBottom: activeTab === 'settings' ? '2px solid #f97316' : '2px solid transparent',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              flex: isMobile ? 1 : 'initial'
             }}
           >
-            ⚙️ Settings
+            {isMobile ? '⚙️' : '⚙️ Settings'}
           </button>
         </div>
 
@@ -536,7 +539,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Profile Information</h3>
                 <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '8px' : '12px' }}>Customize your public profile</p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px', maxWidth: '400px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '8px' : '12px', maxWidth: isMobile ? '100%' : '400px' }}>
                   {/* Display Name */}
                   <div>
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
