@@ -17,6 +17,13 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ video, category, onClose, onNext, onSubmitVideo, categoryCounts, onChangeCategory }: VideoPlayerProps) {
+  const CATEGORY_EMOJI: Record<VideoCategory, string> = {
+    inspiration: '💡',
+    music: '🎵',
+    comedy: '😄',
+    cooking: '🍳',
+    street_voices: '🎤',
+  };
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [flagging, setFlagging] = useState(false);
   const [flagged, setFlagged] = useState(false);
@@ -466,6 +473,8 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               const count = categoryCounts[cat] || 0;
               const active = cat === category;
               const disabled = count === 0;
+              const label = CATEGORY_LABELS[cat];
+              const emoji = CATEGORY_EMOJI[cat];
               return (
                 <button
                   key={cat}
@@ -473,21 +482,30 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                   onClick={() => !disabled && !active && onChangeCategory(cat)}
                   style={{
                     whiteSpace: 'nowrap',
-                    padding: '8px 12px',
+                    padding: isMobile ? '6px 10px' : '8px 12px',
                     borderRadius: '9999px',
                     border: '1px solid ' + (active ? '#60a5fa' : '#334155'),
                     background: active ? '#1f2937' : '#111827',
                     color: disabled ? '#6b7280' : '#e5e7eb',
                     opacity: disabled ? 0.6 : 1,
-                    fontSize: '12px',
+                    fontSize: isMobile ? 12 : 12,
                     fontWeight: 600,
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    gap: isMobile ? '6px' : '8px'
                   }}
                   aria-pressed={active}
-                  title={CATEGORY_LABELS[cat]}
+                  aria-label={label}
+                  title={label}
                 >
-                  {CATEGORY_LABELS[cat]}
+                  {isMobile ? (
+                    <>
+                      <span aria-hidden>{emoji}</span>
+                      {active && <span>{label}</span>}
+                    </>
+                  ) : (
+                    <span>{label}</span>
+                  )}
                 </button>
               );
             })}
