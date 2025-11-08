@@ -209,11 +209,18 @@ export default function Home() {
 
   function handleCountryClick(countryCode: string) {
     console.log('handleCountryClick called with:', countryCode);
-    // Keep existing sidebar behavior for now, but also show category picker
-    setSelectedCountry(countryCode);
     setCurrentVideo(null);
-    setPickerCountry(countryCode);
-    setShowCategoryPicker(true);
+    if (isMobile) {
+      // Mobile: keep using the sidebar (bottom panel) to show categories
+      setSelectedCountry(countryCode);
+      setPickerCountry(null);
+      setShowCategoryPicker(false);
+    } else {
+      // Desktop: do NOT change the sidebar; use the overlay picker instead
+      setSelectedCountry(null);
+      setPickerCountry(countryCode);
+      setShowCategoryPicker(true);
+    }
     console.log('Country selected:', countryCode);
   }
 
