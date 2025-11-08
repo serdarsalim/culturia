@@ -240,8 +240,11 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
           // Flip colors: make the modal card darker than the backdrop
           backgroundColor: '#000000',
           borderRadius: isMobile ? '12px' : '16px',
-          padding: isMobile ? '16px' : '24px',
-          // Add thicker top padding so the close button sits in the header space
+          // Increase side paddings so the frame feels balanced
+          paddingLeft: isMobile ? '20px' : '32px',
+          paddingRight: isMobile ? '20px' : '32px',
+          paddingBottom: isMobile ? '16px' : '24px',
+          // Thicker top padding so the close button sits in the header space
           paddingTop: isMobile ? '44px' : '52px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
           position: 'relative'
