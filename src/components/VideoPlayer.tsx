@@ -231,38 +231,7 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
       }}
       onClick={onClose}
     >
-      {/* Global Close (X) outside the player card */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        aria-label="Close"
-        title="Close"
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          width: '34px',
-          height: '34px',
-          borderRadius: '9999px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          color: '#cbd5e1',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.15s ease'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
-          e.currentTarget.style.color = '#ffffff';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.color = '#cbd5e1';
-        }}
-      >
-        ✕
-      </button>
+      {/* Close button will be positioned inside the modal card */}
       <div
         style={{
           width: '100%',
@@ -275,7 +244,39 @@ export default function VideoPlayer({ video, category, onClose, onNext }: VideoP
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close moved outside the player card */}
+        {/* Close (X) at top-right of modal card */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          title="Close"
+          style={{
+            position: 'absolute',
+            top: isMobile ? '8px' : '10px',
+            right: isMobile ? '8px' : '10px',
+            width: isMobile ? '32px' : '32px',
+            height: isMobile ? '32px' : '32px',
+            borderRadius: '9999px',
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: '#9ca3af',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            zIndex: 2
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#111827';
+            e.currentTarget.style.color = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = '#9ca3af';
+          }}
+        >
+          ✕
+        </button>
         {/* Video Container */}
         <div style={{
           position: 'relative',
