@@ -133,7 +133,6 @@ export default function CategoryPicker({ countryCode, counts, loading, onSelect,
               <span style={{ fontSize: '20px' }}>＋</span>
               <span style={{ fontSize: '14px', fontWeight: 700 }}>Submit Videos</span>
             </div>
-            <span style={{ fontSize: '12px', color: '#9a3412', fontWeight: 600 }}>Add</span>
           </button>
         </div>
       </div>
