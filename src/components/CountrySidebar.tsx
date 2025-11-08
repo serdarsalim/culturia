@@ -12,6 +12,7 @@ interface CountrySidebarProps {
   onSubmitClick: () => void;
   videoCache: VideoSubmission[];
   videoCacheReady: boolean;
+  signedInLabel?: string | null;
 }
 
 // Color schemes for each category
@@ -65,6 +66,7 @@ export default function CountrySidebar({
   onSubmitClick,
   videoCache,
   videoCacheReady,
+  signedInLabel,
 }: CountrySidebarProps) {
   const country = getCountryByCode(countryCode);
   const [videoCounts, setVideoCounts] = useState<Record<VideoCategory, number>>({
@@ -336,6 +338,21 @@ export default function CountrySidebar({
           </>
         )}
       </div>
+
+      {isMobile && signedInLabel && (
+        <div style={{
+          padding: '12px 16px 18px',
+          fontSize: '12px',
+          color: '#475569',
+          textAlign: 'center',
+          borderTop: '1px solid rgba(148, 163, 184, 0.35)'
+        }}>
+          <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '11px', color: '#94a3b8', marginRight: '6px' }}>
+            Signed in as:
+          </span>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>{signedInLabel}</span>
+        </div>
+      )}
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {

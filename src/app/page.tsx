@@ -16,6 +16,7 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentVideo, setCurrentVideo] = useState<{ video: VideoSubmission; category: VideoCategory } | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<{ username: string | null; display_name: string | null } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
@@ -93,6 +94,10 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         preloadProfileData(session.user.id);
+        fetchUserProfile(session.user.id);
+      } else {
+        setProfileData(null);
+        setUserProfile(null);
       }
     });
 
@@ -102,8 +107,10 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         preloadProfileData(session.user.id);
+        fetchUserProfile(session.user.id);
       } else {
         setProfileData(null);
+        setUserProfile(null);
       }
     });
 
@@ -149,6 +156,37 @@ export default function Home() {
       setProfileData({ favorites, submissions });
     } catch (error) {
       console.error('Error preloading profile data:', error);
+    }
+  }
+
+  async function fetchUserProfile(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('username, display_name')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        // If no profile row yet, clear state silently
+        if (error.code === 'PGRST116') {
+          setUserProfile(null);
+          return;
+        }
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      if (data) {
+        setUserProfile({
+          username: data.username ?? null,
+          display_name: data.display_name ?? null,
+        });
+      } else {
+        setUserProfile(null);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
     }
   }
 
@@ -406,6 +444,34 @@ export default function Home() {
     }
   }
 
+  const sanitizedUsername = userProfile?.username ? userProfile.username.replace(/^@/, '').trim() : '';
+  const primaryIdentity =
+    userProfile?.display_name?.trim() ||
+    sanitizedUsername ||
+    (user?.email ? user.email.split('@')[0] : 'Explorer');
+  const secondaryIdentity = sanitizedUsername ? `@${sanitizedUsername}` : (user?.email || '');
+
+  const identityDisplay = secondaryIdentity && secondaryIdentity !== primaryIdentity
+    ? `${primaryIdentity} • ${secondaryIdentity}`
+    : primaryIdentity;
+
+  const userIdentityMark = user ? (
+    <div style={{
+      marginTop: 'auto',
+      padding: '16px',
+      fontSize: '12px',
+      color: '#475569',
+      textAlign: 'center'
+    }}>
+      <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '11px', color: '#94a3b8', marginRight: '6px' }}>
+        Signed in as:
+      </span>
+      <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '12px' }}>
+        {identityDisplay}
+      </span>
+    </div>
+  ) : null;
+
   return (
     <div className="home-layout h-screen overflow-hidden">
       {/* Sidebar - bottom on mobile, left on desktop */}
@@ -424,160 +490,163 @@ export default function Home() {
             onSubmitClick={handleSubmitClick}
             videoCache={videoCache}
             videoCacheReady={videoCacheReady}
+            signedInLabel={user ? identityDisplay : null}
           />
         ) : (
           <div className="h-full flex flex-col" style={{ padding: isMobile ? '16px 24px' : '32px' }}>
             {/* Header - Logo and Auth Links */}
             {isMobile ? (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <div>
-                  <h1 style={{
-                    fontSize: '20px',
-                    fontWeight: 700,
-                    letterSpacing: '-0.02em',
-                    margin: 0,
-                    background: 'linear-gradient(120deg, #f97316, #fb923c)',
-                    WebkitBackgroundClip: 'text',
-                    color: 'transparent'
-                  }}>
-                    🌍 CULTURIA
-                  </h1>
-                  <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>Native-language videos worldwide</p>
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <div>
+                    <h1 style={{
+                      fontSize: '20px',
+                      fontWeight: 700,
+                      letterSpacing: '-0.02em',
+                      margin: 0,
+                      background: 'linear-gradient(120deg, #f97316, #fb923c)',
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent'
+                    }}>
+                      🌍 CULTURIA
+                    </h1>
+                    <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>Native-language videos worldwide</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '14px', fontSize: '13px', alignItems: 'center' }}>
+                    {!user ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            setAuthMode('signup');
+                            setShowAuthModal(true);
+                          }}
+                          style={{
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textDecoration: 'underline',
+                            padding: 0,
+                            transition: 'color 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#6b7280';
+                          }}
+                        >
+                          Sign Up
+                        </button>
+                        <span style={{ color: '#d1d5db' }}>|</span>
+                        <button
+                          onClick={() => {
+                            setAuthMode('login');
+                            setShowAuthModal(true);
+                          }}
+                          style={{
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textDecoration: 'underline',
+                            padding: 0,
+                            transition: 'color 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#6b7280';
+                          }}
+                        >
+                          Log In
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setProfileModalTab('favorites');
+                            setShowProfileModal(true);
+                          }}
+                          style={{
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textDecoration: 'none',
+                            padding: 0,
+                            transition: 'color 0.2s',
+                            fontSize: '16px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#6b7280';
+                          }}
+                          title="Favorites"
+                        >
+                          ❤️
+                        </button>
+                        <span style={{ color: '#d1d5db' }}>|</span>
+                        <button
+                          onClick={() => {
+                            setProfileModalTab('submissions');
+                            setShowProfileModal(true);
+                          }}
+                          style={{
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textDecoration: 'none',
+                            padding: 0,
+                            transition: 'color 0.2s',
+                            fontSize: '16px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#6b7280';
+                          }}
+                          title="My Submissions"
+                        >
+                          📤
+                        </button>
+                        <span style={{ color: '#d1d5db' }}>|</span>
+                        <button
+                          onClick={() => {
+                            setProfileModalTab('settings');
+                            setShowProfileModal(true);
+                          }}
+                          style={{
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            border: 'none',
+                            backgroundColor: 'transparent',
+                            textDecoration: 'none',
+                            padding: 0,
+                            transition: 'color 0.2s',
+                            fontSize: '16px'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#000000';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#6b7280';
+                          }}
+                          title="Settings"
+                        >
+                          ⚙️
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '14px', fontSize: '13px', alignItems: 'center' }}>
-                  {!user ? (
-                    <>
-                      <button
-                        onClick={() => {
-                          setAuthMode('signup');
-                          setShowAuthModal(true);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'underline',
-                          padding: 0,
-                          transition: 'color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                      >
-                        Sign Up
-                      </button>
-                      <span style={{ color: '#d1d5db' }}>|</span>
-                      <button
-                        onClick={() => {
-                          setAuthMode('login');
-                          setShowAuthModal(true);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'underline',
-                          padding: 0,
-                          transition: 'color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                      >
-                        Log In
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          setProfileModalTab('favorites');
-                          setShowProfileModal(true);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'none',
-                          padding: 0,
-                          transition: 'color 0.2s',
-                          fontSize: '16px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                        title="Favorites"
-                      >
-                        ❤️
-                      </button>
-                      <span style={{ color: '#d1d5db' }}>|</span>
-                      <button
-                        onClick={() => {
-                          setProfileModalTab('submissions');
-                          setShowProfileModal(true);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'none',
-                          padding: 0,
-                          transition: 'color 0.2s',
-                          fontSize: '16px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                        title="My Submissions"
-                      >
-                        📤
-                      </button>
-                      <span style={{ color: '#d1d5db' }}>|</span>
-                      <button
-                        onClick={() => {
-                          setProfileModalTab('settings');
-                          setShowProfileModal(true);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'none',
-                          padding: 0,
-                          transition: 'color 0.2s',
-                          fontSize: '16px'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                        title="Settings"
-                      >
-                        ⚙️
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+              </>
             ) : (
               <>
                 {/* Auth Links at top left for desktop */}
@@ -826,6 +895,7 @@ export default function Home() {
                 </a>
               </div>
             </div>
+            {userIdentityMark}
           </div>
         )}
       </div>
@@ -910,7 +980,12 @@ export default function Home() {
       {/* Profile Modal */}
       {showProfileModal && (
         <ProfileModal
-          onClose={() => setShowProfileModal(false)}
+          onClose={() => {
+            setShowProfileModal(false);
+            if (user?.id) {
+              fetchUserProfile(user.id);
+            }
+          }}
           onPlayVideo={(video, category) => {
             setCurrentVideo({ video, category });
           }}
