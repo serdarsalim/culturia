@@ -242,6 +242,11 @@ export default function Home() {
     setCurrentVideo(null);
   }
 
+  function handleOpenSubmitFromPlayer(countryCode: string, category: VideoCategory) {
+    setSelectedCountry(countryCode);
+    setShowSubmissionForm(true);
+  }
+
   function playRandomForCountryCategory(countryCode: string, category: VideoCategory) {
     if (!videoCacheReady) return;
     const matches = videoCache.filter(v => v.country_code === countryCode && v.category === category);
@@ -274,6 +279,20 @@ export default function Home() {
         title: 'No More Videos',
         description: 'No more videos available in this category for this country'
       });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  }
+
+  function handleChangeCategoryInPlayer(newCategory: VideoCategory) {
+    if (!currentVideo || !videoCacheReady) return;
+    const country = currentVideo.video.country_code;
+    const matches = videoCache.filter(v => v.country_code === country && v.category === newCategory);
+    if (matches.length > 0) {
+      const randomVideo = matches[Math.floor(Math.random() * matches.length)];
+      setCurrentVideo({ video: randomVideo, category: newCategory });
+    } else {
+      setToastMessage({ title: 'No Videos', description: 'No videos in this category for this country' });
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     }
@@ -814,6 +833,15 @@ export default function Home() {
           category={currentVideo.category}
           onClose={handleCloseVideo}
           onNext={handleNextVideo}
+          onSubmitVideo={handleOpenSubmitFromPlayer}
+          categoryCounts={{
+            inspiration: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'inspiration').length,
+            music: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'music').length,
+            comedy: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'comedy').length,
+            cooking: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'cooking').length,
+            street_voices: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'street_voices').length,
+          }}
+          onChangeCategory={handleChangeCategoryInPlayer}
         />
       )}
 
