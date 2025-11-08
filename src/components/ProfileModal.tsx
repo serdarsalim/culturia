@@ -670,6 +670,38 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
                   })}
                 </div>
               </div>
+
+              {/* Account Actions */}
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '24px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '12px' }}>Account</h3>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: '#ef4444',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fef2f2';
+                    e.currentTarget.style.borderColor = '#ef4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.borderColor = '#fecaca';
+                  }}
+                >
+                  Log Out
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -569,30 +569,6 @@ export default function Home() {
                       >
                         ⚙️
                       </button>
-                      <span style={{ color: '#d1d5db' }}>|</span>
-                      <button
-                        onClick={async () => {
-                          await supabase.auth.signOut();
-                          setUser(null);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'underline',
-                          padding: 0,
-                          transition: 'color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                      >
-                        Log Out
-                      </button>
                     </>
                   )}
                 </div>
@@ -729,30 +705,6 @@ export default function Home() {
                         title="Settings"
                       >
                         ⚙️
-                      </button>
-                      <span style={{ color: '#d1d5db' }}>|</span>
-                      <button
-                        onClick={async () => {
-                          await supabase.auth.signOut();
-                          setUser(null);
-                        }}
-                        style={{
-                          color: '#6b7280',
-                          cursor: 'pointer',
-                          border: 'none',
-                          backgroundColor: 'transparent',
-                          textDecoration: 'underline',
-                          padding: 0,
-                          transition: 'color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#000000';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
-                        }}
-                      >
-                        Log Out
                       </button>
                     </>
                   )}
