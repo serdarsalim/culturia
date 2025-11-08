@@ -316,12 +316,12 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
         </button>
 
         {/* Header */}
-        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '16px', flexShrink: 0 }}>
           My Profile
         </h2>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <button
             onClick={() => setActiveTab('favorites')}
             style={{
@@ -336,7 +336,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            ❤️ Favorites ({favorites.length})
+            Favorites
           </button>
           <button
             onClick={() => setActiveTab('submissions')}
@@ -352,7 +352,7 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            📤 My Submissions ({submissions.length})
+            My Submissions
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -368,12 +368,12 @@ export default function ProfileModal({ onClose, onPlayVideo, onEditSubmission, i
               transition: 'all 0.2s'
             }}
           >
-            ⚙️ Settings
+            Settings
           </button>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '48px', color: '#6b7280' }}>
               Loading...
