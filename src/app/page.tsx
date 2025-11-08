@@ -576,7 +576,7 @@ export default function Home() {
             ) : (
               <>
                 {/* Auth Links at top left for desktop */}
-                <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', fontSize: '14px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', fontSize: '14px', alignItems: 'center', justifyContent: 'center' }}>
                   {!user ? (
                     <>
                       <button
