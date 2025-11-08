@@ -154,22 +154,30 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
     e.preventDefault();
     setError('');
 
-    // Check if at least one URL is provided
-    const hasAnyUrl = Object.values(formData).some(data => data.url.trim() !== '');
-    if (!hasAnyUrl) {
-      setError('Please provide at least one YouTube URL');
-      return;
-    }
+  // Check if at least one URL is provided
+  const hasAnyUrl = Object.values(formData).some(data => data.url.trim() !== '');
+  if (!hasAnyUrl) {
+    setError('Please provide at least one YouTube URL');
+    return;
+  }
 
-    // Validate all provided URLs
-    for (const [category, data] of Object.entries(formData)) {
-      if (data.url.trim()) {
-        if (!isValidYouTubeUrl(data.url)) {
-          setError(`Invalid YouTube URL for ${CATEGORY_LABELS[category as VideoCategory]}`);
-          return;
-        }
+  // Validate all provided URLs
+  for (const [category, data] of Object.entries(formData)) {
+    if (data.url.trim()) {
+      if (!isValidYouTubeUrl(data.url)) {
+        setError(`Invalid YouTube URL for ${CATEGORY_LABELS[category as VideoCategory]}`);
+        return;
       }
     }
+  }
+
+  // Require a title when a URL is provided
+  for (const [category, data] of Object.entries(formData)) {
+    if (data.url.trim() && !data.title.trim()) {
+      setError(`Please provide a title for ${CATEGORY_LABELS[category as VideoCategory]}`);
+      return;
+    }
+  }
 
     setLoading(true);
 
@@ -384,7 +392,7 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
         /* Form */
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '16px', padding: isMobile ? '0' : '0 48px' }}>
 
-          {/* Table Header - Desktop only */}
+          {/* Table Header - Desktop only */
           {!isMobile && (
             <div style={{
               display: 'grid',
@@ -394,8 +402,8 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
               marginBottom: '8px'
             }}>
               <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Category</div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Title</div>
               <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>YouTube URL</div>
-              <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Title (Optional)</div>
               <div style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280' }}>Status</div>
             </div>
           )}
@@ -430,12 +438,12 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
                   {renderStatus(formData[category].status)}
                 </div>
 
-                {/* YouTube URL */}
+                {/* Video Title (required if URL provided) */}
                 <input
-                  type="url"
-                  placeholder="YouTube URL"
-                  value={formData[category].url}
-                  onChange={(e) => handleUrlChange(category, e.target.value)}
+                  type="text"
+                  placeholder="Title"
+                  value={formData[category].title}
+                  onChange={(e) => handleTitleChange(category, e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -449,12 +457,12 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
                   }}
                 />
 
-                {/* Video Title */}
+                {/* YouTube URL */}
                 <input
-                  type="text"
-                  placeholder="Title (Optional)"
-                  value={formData[category].title}
-                  onChange={(e) => handleTitleChange(category, e.target.value)}
+                  type="url"
+                  placeholder="YouTube URL"
+                  value={formData[category].url}
+                  onChange={(e) => handleUrlChange(category, e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -487,11 +495,11 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
                   {CATEGORY_LABELS[category]}
                 </div>
 
-                {/* YouTube URL */}
+                {/* Video Title (required if URL provided) */}
                 <input
-                  type="url"
-                  value={formData[category].url}
-                  onChange={(e) => handleUrlChange(category, e.target.value)}
+                  type="text"
+                  value={formData[category].title}
+                  onChange={(e) => handleTitleChange(category, e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 14px',
@@ -504,11 +512,11 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
                   }}
                 />
 
-                {/* Video Title */}
+                {/* YouTube URL */}
                 <input
-                  type="text"
-                  value={formData[category].title}
-                  onChange={(e) => handleTitleChange(category, e.target.value)}
+                  type="url"
+                  value={formData[category].url}
+                  onChange={(e) => handleUrlChange(category, e.target.value)}
                   style={{
                     width: '100%',
                     padding: '10px 14px',
