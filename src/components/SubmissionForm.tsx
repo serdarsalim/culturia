@@ -389,10 +389,10 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
             <p style={{ fontSize: '15px', color: '#6b7280' }}>Loading your submissions...</p>
           </div>
         ) : (
-        /* Form */
+        {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '16px', padding: isMobile ? '0' : '0 48px' }}>
 
-          {/* Table Header - Desktop only */
+          {/* Table Header - Desktop only */}
           {!isMobile && (
             <div style={{
               display: 'grid',
