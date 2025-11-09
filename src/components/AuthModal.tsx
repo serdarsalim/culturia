@@ -13,32 +13,42 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showResetView, setShowResetView] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === 'login' && showResetView) {
+      return; // handled via reset buttons
+    }
+
     setLoading(true);
     setError('');
     setMessage('');
 
     try {
+      if (mode === 'signup' && password !== confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
         });
 
         if (error) throw error;
 
-        setMessage('Check your email to verify your account!');
+        setMessage('Account created successfully!');
         setTimeout(() => {
-          onClose();
-        }, 3000);
+          onSuccess();
+        }, 1000);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -85,6 +95,31 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
       console.error('Google OAuth error:', err);
       setError(err.message || 'An error occurred with Google sign-in');
       setLoading(false);
+    }
+  }
+
+  async function handlePasswordResetRequest() {
+    if (!email) {
+      setError('Enter your email first so we can send the reset link.');
+      return;
+    }
+
+    setResetLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset`,
+      });
+
+      if (error) throw error;
+
+      setMessage('Password reset link sent. Check your email.');
+    } catch (err: any) {
+      setError(err.message || 'Unable to send reset email right now');
+    } finally {
+      setResetLoading(false);
     }
   }
 
@@ -222,37 +257,39 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {/* Email */}
-          <div>
-            <label htmlFor="email" style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '15px',
-                border: 'none',
-                borderRadius: '8px',
-                backgroundColor: '#f3f4f6',
-                color: '#000000',
-                outline: 'none'
-              }}
-              placeholder="you@example.com"
-            />
-          </div>
+          {!(mode === 'login' && showResetView) && (
+            <div>
+              <label htmlFor="email" style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '15px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#000000',
+                  outline: 'none'
+                }}
+                placeholder="you@example.com"
+              />
+            </div>
+          )}
 
-          {/* Password */}
+          {/* Password / Reset Email */}
           <div>
             <label htmlFor="password" style={{
               display: 'block',
@@ -261,33 +298,110 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
               color: '#374151',
               marginBottom: '8px'
             }}>
-              Password
+              {mode === 'login' && showResetView ? 'Email address' : 'Password'}
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '15px',
-                border: 'none',
-                borderRadius: '8px',
-                backgroundColor: '#f3f4f6',
-                color: '#000000',
-                outline: 'none'
-              }}
-              placeholder="••••••••"
-            />
+            {mode === 'login' && showResetView ? (
+              <input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '15px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#000000',
+                  outline: 'none'
+                }}
+                placeholder="you@example.com"
+              />
+            ) : (
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '15px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#000000',
+                  outline: 'none'
+                }}
+                placeholder="••••••••"
+              />
+            )}
             {mode === 'signup' && (
               <p style={{ marginTop: '6px', fontSize: '13px', color: '#6b7280' }}>
                 At least 6 characters
               </p>
             )}
+            {mode === 'login' && !showResetView && (
+              <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResetView(true);
+                    setError('');
+                    setMessage('');
+                  }}
+                  style={{
+                    fontSize: '13px',
+                    color: '#f97316',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* Confirm Password */}
+          {mode === 'signup' && (
+            <div>
+              <label htmlFor="confirmPassword" style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required={mode === 'signup'}
+                minLength={6}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  fontSize: '15px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#000000',
+                  outline: 'none'
+                }}
+                placeholder="Re-enter your password"
+              />
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -311,31 +425,75 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
             </div>
           )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px 24px',
-              fontSize: '15px',
-              fontWeight: '600',
-              color: '#ffffff',
-              backgroundColor: loading ? '#9ca3af' : '#f97316',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = '#ea580c';
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = '#f97316';
-            }}
-          >
-            {loading ? 'Please wait...' : mode === 'signup' ? 'Sign Up' : 'Log In'}
-          </button>
+          {/* Submit / Reset Buttons */}
+            {mode === 'login' && showResetView ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                type="button"
+                disabled={resetLoading}
+                onClick={handlePasswordResetRequest}
+                style={{
+                  width: '100%',
+                  padding: '14px 24px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  color: '#ffffff',
+                  backgroundColor: resetLoading ? '#9ca3af' : '#f97316',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: resetLoading ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {resetLoading ? 'Sending reset email…' : 'Send reset link'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResetView(false);
+                  setError('');
+                  setMessage('');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#475569',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                Back to login
+              </button>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '14px 24px',
+                fontSize: '15px',
+                fontWeight: '600',
+                color: '#ffffff',
+                backgroundColor: loading ? '#9ca3af' : '#f97316',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = '#ea580c';
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = '#f97316';
+              }}
+            >
+              {loading ? 'Please wait...' : mode === 'signup' ? 'Sign Up' : 'Log In'}
+            </button>
+          )}
         </form>
 
         {/* Toggle Mode */}
@@ -345,6 +503,8 @@ export default function AuthModal({ onClose, onSuccess, initialMode = 'signup' }
               setMode(mode === 'signup' ? 'login' : 'signup');
               setError('');
               setMessage('');
+              setConfirmPassword('');
+              setShowResetView(false);
             }}
             style={{
               fontSize: '14px',
