@@ -38,15 +38,12 @@ export default function PasswordResetPage() {
         return;
       }
 
-      const expiresInSeconds = expiresIn ? Number(expiresIn) : 0;
+      const expiresInSeconds = expiresIn ? Number(expiresIn) : undefined;
       const expiresAt = expiresInSeconds ? Math.floor(Date.now() / 1000) + expiresInSeconds : undefined;
 
       const { error: setSessionError } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
-        expires_in: expiresInSeconds,
-        expires_at: expiresAt,
-        token_type: 'bearer',
       });
 
       if (setSessionError) {
