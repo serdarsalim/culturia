@@ -13,6 +13,8 @@ interface CountrySidebarProps {
   videoCache: VideoSubmission[];
   videoCacheReady: boolean;
   signedInLabel?: string | null;
+  selectedCategoryFilter: VideoCategory | null;
+  onCategoryFilterToggle: (category: VideoCategory) => void;
 }
 
 // Color schemes for each category
@@ -67,6 +69,8 @@ export default function CountrySidebar({
   videoCache,
   videoCacheReady,
   signedInLabel,
+  selectedCategoryFilter,
+  onCategoryFilterToggle,
 }: CountrySidebarProps) {
   const country = getCountryByCode(countryCode);
   const [videoCounts, setVideoCounts] = useState<Record<VideoCategory, number>>({
@@ -111,22 +115,6 @@ export default function CountrySidebar({
       setVideoCounts(counts);
     }
   }, [countryCode, videoCache, videoCacheReady]);
-
-  function handleCategoryClick(category: VideoCategory) {
-    if (!videoCacheReady) return;
-
-    // Filter cached videos for this country and category
-    const matchingVideos = videoCache.filter(v =>
-      v.country_code === countryCode &&
-      v.category === category
-    );
-
-    if (matchingVideos.length > 0) {
-      // Pick random video from matching videos
-      const randomVideo = matchingVideos[Math.floor(Math.random() * matchingVideos.length)];
-      onVideoSelect(randomVideo, category);
-    }
-  }
 
   if (!country) {
     console.log('CountrySidebar: No country found for code:', countryCode);
@@ -228,18 +216,23 @@ export default function CountrySidebar({
               const count = videoCounts[category];
               const hasVideos = count > 0;
               const colors = CATEGORY_COLORS[category];
+              const isSelected = selectedCategoryFilter === category;
               return (
                 <button
                   key={category}
-                  onClick={() => hasVideos && handleCategoryClick(category)}
+                  onClick={() => hasVideos && onCategoryFilterToggle(category)}
                   disabled={!hasVideos || !videoCacheReady}
                   style={{
                     width: '100%',
                     textAlign: 'left',
                     padding: '14px 16px',
                     borderRadius: '12px',
-                    border: hasVideos ? '1px solid rgba(148, 163, 184, 0.4)' : '1px solid rgba(226, 232, 240, 0.8)',
-                    backgroundColor: hasVideos ? '#ffffff' : '#f8fafc',
+                    border: isSelected
+                      ? '2px solid #f97316'
+                      : hasVideos
+                        ? '1px solid rgba(148, 163, 184, 0.4)'
+                        : '1px solid rgba(226, 232, 240, 0.8)',
+                    backgroundColor: isSelected ? '#fff7ed' : hasVideos ? '#ffffff' : '#f8fafc',
                     cursor: hasVideos ? 'pointer' : 'not-allowed',
                     opacity: hasVideos ? 1 : 0.45,
                     transition: 'all 0.2s',
@@ -252,7 +245,9 @@ export default function CountrySidebar({
                     <span style={{ fontSize: '20px' }}>{colors.icon}</span>
                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{label}</span>
                   </div>
-                  <span style={{ fontSize: '18px', color: hasVideos ? '#94a3b8' : '#cbd5f5' }}>→</span>
+                  <span style={{ fontSize: '16px', color: isSelected ? '#f97316' : '#94a3b8' }}>
+                    {isSelected ? '✓' : '→'}
+                  </span>
                 </button>
               );
             })}
@@ -284,29 +279,37 @@ export default function CountrySidebar({
                 const count = videoCounts[category];
                 const hasVideos = count > 0;
                 const colors = CATEGORY_COLORS[category];
+                const isSelected = selectedCategoryFilter === category;
                 return (
                   <button
                     key={category}
-                    onClick={() => hasVideos && handleCategoryClick(category)}
+                    onClick={() => hasVideos && onCategoryFilterToggle(category)}
                     disabled={!hasVideos || !videoCacheReady}
                     style={{
                       width: '100%',
                       textAlign: 'left',
                       padding: '14px 18px',
                       borderRadius: '8px',
-                      border: hasVideos ? '1px solid rgba(148, 163, 184, 0.4)' : '1px solid #f3f4f6',
-                      backgroundColor: hasVideos ? '#ffffff' : '#f8fafc',
+                      border: isSelected
+                        ? '2px solid #f97316'
+                        : hasVideos
+                          ? '1px solid rgba(148, 163, 184, 0.4)'
+                          : '1px solid #f3f4f6',
+                      backgroundColor: isSelected ? '#fff7ed' : hasVideos ? '#ffffff' : '#f8fafc',
                       cursor: hasVideos ? 'pointer' : 'not-allowed',
                       opacity: hasVideos ? 1 : 0.5,
                       transition: 'all 0.2s'
                     }}
+                    aria-pressed={isSelected}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <span style={{ fontSize: '22px' }}>{colors.icon}</span>
                         <span style={{ fontSize: '14px', fontWeight: 500, color: '#000000' }}>{label}</span>
                       </div>
-                      <span style={{ fontSize: '18px', color: hasVideos ? '#94a3b8' : '#cbd5f5' }}>→</span>
+                      <span style={{ fontSize: '18px', color: isSelected ? '#f97316' : '#94a3b8' }}>
+                        {isSelected ? '✓' : '→'}
+                      </span>
                     </div>
                   </button>
                 );

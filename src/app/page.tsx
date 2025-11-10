@@ -9,7 +9,6 @@ import AuthModal from '@/components/AuthModal';
 import SubmissionForm from '@/components/SubmissionForm';
 import ProfileModal from '@/components/ProfileModal';
 import CategoryPicker from '@/components/CategoryPicker';
-import CategoryInfoCard from '@/components/CategoryInfoCard';
 import { VISIBLE_CATEGORIES, CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
 
 const CATEGORY_ICON_MAP: Record<VideoCategory, string> = {
@@ -54,8 +53,8 @@ export default function Home() {
     mine: false,
   });
   const pendingSubmissionCountryRef = useRef<string | null>(null);
-  const [showCategoryInfo, setShowCategoryInfo] = useState(false);
-  const [categoryInfoCategory, setCategoryInfoCategory] = useState<VideoCategory>(VISIBLE_CATEGORIES[0]);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<VideoCategory | null>(null);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   // Set of countries that currently have at least one approved video
   const countriesWithVideos = useMemo(() => {
@@ -321,10 +320,26 @@ export default function Home() {
       return;
     }
 
+    const categoriesToTry = selectedCategoryFilter
+      ? [selectedCategoryFilter, ...VISIBLE_CATEGORIES.filter(cat => cat !== selectedCategoryFilter)]
+      : VISIBLE_CATEGORIES;
+
+    for (const categoryOption of categoriesToTry) {
+      const matches = videoCache.filter(
+        v => v.country_code === countryCode && v.category === categoryOption
+      );
+
+      if (matches.length > 0) {
+        const randomVideo = matches[Math.floor(Math.random() * matches.length)];
+        setCurrentVideo({ video: randomVideo, category: categoryOption });
+        setSelectedCountry(null);
+        return;
+      }
+    }
+
     const latest = videoCache.find(v => v.country_code === countryCode);
     if (latest) {
       setCurrentVideo({ video: latest, category: latest.category as VideoCategory });
-      // Do not alter sidebar selection for this flow
       setSelectedCountry(null);
     } else {
       // No videos for this country
@@ -420,35 +435,8 @@ export default function Home() {
     }
   }
 
-  function handleCategoryClick(category: VideoCategory) {
-    if (!videoCacheReady) return;
-
-    // Filter cached videos for this category
-    const categoryVideos = videoCache.filter(v => v.category === category);
-
-    if (categoryVideos.length > 0) {
-      const randomVideo = categoryVideos[Math.floor(Math.random() * categoryVideos.length)];
-      setCurrentVideo({ video: randomVideo, category });
-      // Close country sidebar if open
-      setSelectedCountry(null);
-    } else {
-      // Show toast
-      setToastMessage({
-        title: 'No Videos Available',
-        description: 'No videos have been approved in this category yet'
-      });
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }
-  }
-
   function handleGlobalCategoryClick(category: VideoCategory) {
-    if (selectedCountry) {
-      handleCategoryClick(category);
-    } else {
-      setCategoryInfoCategory(category);
-      setShowCategoryInfo(true);
-    }
+    handleCategoryFilterToggle(category);
   }
 
   function handleSubmitClick() {
@@ -485,6 +473,10 @@ export default function Home() {
     }
   }
 
+  function handleCategoryFilterToggle(category: VideoCategory) {
+    setSelectedCategoryFilter(prev => (prev === category ? null : category));
+  }
+
   const sanitizedUsername = userProfile?.username ? userProfile.username.replace(/^@/, '').trim() : '';
   const primaryIdentity =
     userProfile?.display_name?.trim() ||
@@ -515,6 +507,8 @@ export default function Home() {
             videoCache={videoCache}
             videoCacheReady={videoCacheReady}
             signedInLabel={user ? identityDisplay : null}
+            selectedCategoryFilter={selectedCategoryFilter}
+            onCategoryFilterToggle={handleCategoryFilterToggle}
           />
         ) : (
           <div className="h-full flex flex-col" style={{ padding: isMobile ? '34px 16px 16px' : '32px' }}>
@@ -522,7 +516,16 @@ export default function Home() {
             {isMobile ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <div>
+                  <button
+                    onClick={() => setShowAboutModal(true)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
                     <h1 style={{
                       fontSize: '20px',
                       fontWeight: 700,
@@ -535,7 +538,7 @@ export default function Home() {
                       🌍 CULTURIA
                     </h1>
                     <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>Native-language videos worldwide</p>
-                  </div>
+                  </button>
                   <div style={{ display: 'flex', gap: '14px', fontSize: '13px', alignItems: 'center' }}>
                     {!user ? (
                       <>
@@ -813,7 +816,10 @@ export default function Home() {
             {/* Main Content */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: isMobile ? '8px' : '60px' }}>
               {!isMobile && (
-                <div>
+                <button
+                  onClick={() => setShowAboutModal(true)}
+                  style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+                >
                   <h1 style={{
                     fontSize: '32px',
                     fontWeight: 700,
@@ -826,7 +832,7 @@ export default function Home() {
                     🌍 CULTURIA
                   </h1>
                   <p style={{ fontSize: '13px', color: '#6b7280' }}>Native-language content from every country</p>
-                </div>
+                </button>
               )}
 
               <div style={{
@@ -837,6 +843,7 @@ export default function Home() {
                 {VISIBLE_CATEGORIES.map((key) => {
                   const icon = CATEGORY_ICON_MAP[key];
                   const label = CATEGORY_LABELS[key];
+                  const isSelected = selectedCategoryFilter === key;
                   return (
                   <button
                     key={key}
@@ -847,8 +854,10 @@ export default function Home() {
                       gap: '12px',
                       padding: '12px 16px',
                       borderRadius: '14px',
-                      border: '1px solid rgba(145, 152, 171, 0.3)',
-                      background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
+                      border: isSelected ? '2px solid #f97316' : '1px solid rgba(145, 152, 171, 0.3)',
+                      background: isSelected
+                        ? 'linear-gradient(135deg, #fff7ed, #ffe4d1)'
+                        : 'linear-gradient(135deg, #ffffff, #f8fafc)',
                       cursor: 'pointer',
                       textAlign: 'left',
                       boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
@@ -1027,13 +1036,101 @@ export default function Home() {
         />
       )}
 
-      {/* Category Info Modal */}
-      {showCategoryInfo && (
-        <CategoryInfoCard
-          activeCategory={categoryInfoCategory}
-          onChangeCategory={(cat) => setCategoryInfoCategory(cat)}
-          onClose={() => setShowCategoryInfo(false)}
-        />
+      {/* About Modal */}
+      {showAboutModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 220,
+            backgroundColor: 'rgba(3,7,18,0.8)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+          onClick={() => setShowAboutModal(false)}
+        >
+          <div
+            style={{
+              maxWidth: '720px',
+              width: '100%',
+              background: 'radial-gradient(circle at top, #0f172a 0%, #020617 80%)',
+              color: '#f8fafc',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 30px 80px rgba(15, 23, 42, 0.6)',
+              border: '1px solid rgba(248, 250, 252, 0.08)',
+              position: 'relative',
+              overflowY: 'auto',
+              maxHeight: '90vh'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowAboutModal(false)}
+              aria-label="Close About Modal"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '999px',
+                border: '1px solid rgba(248, 250, 252, 0.2)',
+                background: 'rgba(2,6,23,0.6)',
+                color: '#f8fafc',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '28px' }}>🌍</span>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 700 }}>CULTURIA - Discover the World Through Authentic Voices</h2>
+                <p style={{ margin: '6px 0 0', color: '#94a3b8' }}>Experience real culture, in real languages, from real people.</p>
+              </div>
+            </div>
+            <p style={{ lineHeight: 1.6, color: '#e2e8f0' }}>
+              Most content online is translated, dubbed, or made for tourists. CULTURIA is different. We show you what it's actually like to live somewhere—through videos created by locals, in their native language, speaking authentically.
+            </p>
+
+            <div style={{ marginTop: '24px' }}>
+              <h3 style={{ fontSize: '16px', letterSpacing: '0.2em', color: '#f97316', marginBottom: '12px' }}>WHY THESE 4 CATEGORIES?</h3>
+              <div style={{ display: 'grid', gap: '16px' }}>
+                {[
+                  { icon: '🎤', title: 'Talks', body: 'Listen to real people discuss ideas, share stories, give speeches, and have conversations. This is where you hear how people think and communicate.' },
+                  { icon: '🎵', title: 'Music', body: 'Every culture expresses itself through music. From traditional folk songs to modern hits, experience the sounds that define a place.' },
+                  { icon: '😄', title: 'Comedy', body: 'Humor reveals what a culture finds funny, clever, or absurd. It’s cultural insight wrapped in entertainment.' },
+                  { icon: '🍴', title: 'Food', body: 'Food is universal but deeply personal. Watch locals cook, eat, and talk about the dishes that matter to them.' },
+                ].map(({ icon, title, body }) => (
+                  <div key={title} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '24px' }}>{icon}</span>
+                    <div>
+                      <strong style={{ fontSize: '15px' }}>{title}</strong>
+                      <p style={{ margin: '4px 0 0', lineHeight: 1.5, color: '#cbd5f5' }}>{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px', padding: '20px', borderRadius: '18px', background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
+              <h3 style={{ margin: 0, color: '#fb923c', fontSize: '14px', letterSpacing: '0.15em' }}>OUR MISSION</h3>
+              <p style={{ marginTop: '8px', lineHeight: 1.6, color: '#f8fafc' }}>
+                No translations. No tourist content. Just authentic cultural moments, captured in the source language, showing you what it really means to be from somewhere.
+              </p>
+            </div>
+
+            <div style={{ marginTop: '24px', padding: '16px', borderRadius: '18px', background: '#0f172a', border: '1px solid rgba(248, 250, 252, 0.06)' }}>
+              <p style={{ margin: 0, lineHeight: 1.6 }}>
+                Click any country. Pick a category. Immerse yourself. <span style={{ color: '#38bdf8', fontWeight: 600 }}>Let authentic voices guide you.</span>
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast Notification */}
