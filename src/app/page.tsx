@@ -844,7 +844,7 @@ export default function Home() {
             </div>
 
             {/* Footer - Subtitle and Links */}
-            <div style={{ marginTop: isMobile ? '60px' : 'auto', paddingTop: isMobile ? '0' : '24px', paddingBottom: isMobile ? '24px' : '24px' }}>
+            <div style={{ marginTop: isMobile ? '60px' : 'auto', paddingTop: isMobile ? '0' : '24px', paddingBottom: isMobile ? '80px' : '60px' }}>
               <p style={{
                 fontSize: isMobile ? '13px' : '13px',
                 color: '#4b5563',

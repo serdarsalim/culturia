@@ -302,12 +302,12 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
           title="Close"
           style={{
             position: 'absolute',
-            top: isMobile ? '12px' : '8px',
-            right: isMobile ? '12px' : '8px',
-            width: isMobile ? '36px' : '32px',
-            height: isMobile ? '36px' : '32px',
+            top: isMobile ? '12px' : '12px',
+            right: isMobile ? '12px' : '12px',
+            width: isMobile ? '40px' : '40px',
+            height: isMobile ? '40px' : '40px',
             borderRadius: '9999px',
-            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.6)' : 'transparent',
+            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.6)',
             border: 'none',
             color: '#ffffff',
             display: 'flex',
@@ -316,16 +316,18 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
             cursor: 'pointer',
             transition: 'all 0.15s ease',
             zIndex: 2,
-            fontSize: isMobile ? '20px' : '16px',
-            fontWeight: isMobile ? '300' : 'normal'
+            fontSize: isMobile ? '24px' : '22px',
+            fontWeight: '300'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = isMobile ? 'rgba(0, 0, 0, 0.8)' : '#111827';
+            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
             e.currentTarget.style.color = '#ffffff';
+            e.currentTarget.style.transform = 'scale(1.1)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = isMobile ? 'rgba(0, 0, 0, 0.6)' : 'transparent';
-            e.currentTarget.style.color = isMobile ? '#ffffff' : '#9ca3af';
+            e.currentTarget.style.backgroundColor = isMobile ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.6)';
+            e.currentTarget.style.color = '#ffffff';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           ✕
@@ -517,13 +519,13 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               onClick={toggleFavorite}
               disabled={favoriting}
               style={{
-                padding: isMobile ? '6px 12px' : '10px 20px',
-                height: isMobile ? '32px' : '40px',
+                padding: isMobile ? '6px 12px' : '10px 16px',
                 backgroundColor: isFavorited ? '#ef4444' : '#374151',
                 color: '#ffffff',
                 borderRadius: '8px',
                 border: 'none',
-                fontSize: isMobile ? '16px' : '16px',
+                fontSize: isMobile ? '16px' : '13px',
+                fontWeight: 600,
                 cursor: favoriting ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
                 display: 'flex',
@@ -550,14 +552,13 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
             <button
               onClick={onNext}
               style={{
-                padding: isMobile ? '6px 12px' : '10px 24px',
-                height: isMobile ? '32px' : '40px',
+                padding: isMobile ? '6px 12px' : '10px 16px',
                 backgroundColor: '#1f2937',
                 color: '#ffffff',
                 borderRadius: '8px',
                 border: 'none',
-                fontSize: isMobile ? '16px' : '14px',
-                fontWeight: '600',
+                fontSize: isMobile ? '16px' : '13px',
+                fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
                 display: 'flex',
@@ -576,12 +577,11 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               onClick={() => onSubmitVideo(video.country_code, category)}
               style={{
                 padding: isMobile ? '6px 10px' : '10px 16px',
-                height: isMobile ? '32px' : '40px',
                 backgroundColor: '#f97316',
                 color: '#ffffff',
                 borderRadius: '8px',
                 border: 'none',
-                fontSize: isMobile ? '16px' : '14px',
+                fontSize: isMobile ? '16px' : '13px',
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',

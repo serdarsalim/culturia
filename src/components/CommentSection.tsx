@@ -23,6 +23,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -298,20 +299,39 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
       height: '100%',
       color: '#ffffff'
     }}>
-      {/* Header */}
-      <div style={{
-        padding: isMobile ? '12px' : '16px',
-        fontWeight: 700,
-        fontSize: isMobile ? '14px' : '16px'
-      }}>
-        Perspectives ({comments.length})
+      {/* Header with toggle button */}
+      <div
+        onClick={() => isMobile && setIsExpanded(!isExpanded)}
+        style={{
+          padding: isMobile ? '12px' : '16px',
+          fontWeight: 700,
+          fontSize: isMobile ? '14px' : '16px',
+          cursor: isMobile ? 'pointer' : 'default',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          userSelect: 'none'
+        }}
+      >
+        <span>Comments ({comments.length})</span>
+        {isMobile && (
+          <span style={{
+            fontSize: '20px',
+            transition: 'transform 0.2s ease',
+            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+          }}>
+            ▼
+          </span>
+        )}
       </div>
 
-      {/* Comment List */}
+      {/* Comment List - collapsible on mobile */}
+      {(!isMobile || isExpanded) && (
       <div style={{
         flex: 1,
         overflowY: 'auto',
         padding: isMobile ? '12px' : '16px',
+        paddingBottom: '150px',
         display: 'flex',
         flexDirection: 'column',
         gap: isMobile ? '12px' : '16px',
@@ -468,8 +488,10 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
           ))
         )}
       </div>
+      )}
 
-      {/* Comment Input Area */}
+      {/* Comment Input Area - collapsible on mobile */}
+      {(!isMobile || isExpanded) && (
       <div style={{
         padding: isMobile ? '12px' : '16px',
         borderTop: '1px solid #333333',
@@ -592,6 +614,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
           </div>
         )}
       </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
