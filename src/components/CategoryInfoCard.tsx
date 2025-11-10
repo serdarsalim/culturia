@@ -1,6 +1,6 @@
 'use client';
 
-import type { VideoCategory } from '@/types';
+import { VISIBLE_CATEGORIES, type VideoCategory } from '@/types';
 
 const CATEGORY_DETAILS: Record<VideoCategory, {
   title: string;
@@ -39,7 +39,7 @@ const CATEGORY_DETAILS: Record<VideoCategory, {
     ],
   },
   cooking: {
-    title: 'Cooking',
+    title: 'Food',
     icon: '🍳',
     tagline: 'Home kitchens and street food classics, unfiltered.',
     points: [
@@ -49,7 +49,7 @@ const CATEGORY_DETAILS: Record<VideoCategory, {
     ],
   },
   street_voices: {
-    title: 'Street Voices',
+    title: 'Talks',
     icon: '🎤',
     tagline: 'Candid conversations and micro-docs shot on the street.',
     points: [
@@ -68,7 +68,7 @@ interface CategoryInfoCardProps {
 
 export default function CategoryInfoCard({ activeCategory, onChangeCategory, onClose }: CategoryInfoCardProps) {
   const details = CATEGORY_DETAILS[activeCategory];
-  const categoryEntries = Object.entries(CATEGORY_DETAILS) as [VideoCategory, typeof details][];
+  const categoryEntries = VISIBLE_CATEGORIES.map(category => [category, CATEGORY_DETAILS[category]] as [VideoCategory, typeof details]);
 
   return (
     <div

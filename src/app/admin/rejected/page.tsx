@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
-import { CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
+import { CATEGORY_LABELS, VISIBLE_CATEGORIES, type VideoSubmission, type VideoCategory } from '@/types';
 import { getYouTubeThumbnail, getYouTubeWatchUrl } from '@/lib/youtube';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -27,7 +27,11 @@ export default function RejectedSubmissions() {
 
       if (error) throw error;
 
-      setSubmissions(data || []);
+      const filtered = (data || []).filter((submission) =>
+        VISIBLE_CATEGORIES.includes(submission.category as VideoCategory)
+      );
+
+      setSubmissions(filtered);
     } catch (error) {
       console.error('Error fetching submissions:', error);
     } finally {

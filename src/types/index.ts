@@ -54,9 +54,12 @@ export const CATEGORY_LABELS: Record<VideoCategory, string> = {
   inspiration: 'Inspiration',
   music: 'Music',
   comedy: 'Comedy',
-  cooking: 'Cooking',
-  street_voices: 'Street Voices',
+  cooking: 'Food',
+  street_voices: 'Talks',
 };
+
+// Only expose the public-facing categories in UI components
+export const VISIBLE_CATEGORIES: VideoCategory[] = ['music', 'comedy', 'cooking', 'street_voices'];
 
 export const FLAG_REASONS = [
   { value: 'broken', label: 'Video is broken or unavailable' },

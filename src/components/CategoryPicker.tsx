@@ -1,7 +1,7 @@
 'use client';
 
 import { getCountryFlag, getCountryName } from '@/lib/countries';
-import type { VideoCategory } from '@/types';
+import { type VideoCategory, VISIBLE_CATEGORIES } from '@/types';
 
 interface CategoryPickerProps {
   countryCode: string;
@@ -16,15 +16,15 @@ const CATEGORY_LABELS: Record<VideoCategory, { label: string; icon: string }> = 
   inspiration: { label: 'Inspiration', icon: '💡' },
   music: { label: 'Music', icon: '🎵' },
   comedy: { label: 'Comedy', icon: '😄' },
-  cooking: { label: 'Cooking', icon: '🍳' },
-  street_voices: { label: 'Street Voices', icon: '🎤' },
+  cooking: { label: 'Food', icon: '🍳' },
+  street_voices: { label: 'Talks', icon: '🎤' },
 };
 
 export default function CategoryPicker({ countryCode, counts, loading, onSelect, onSubmitVideos, onClose }: CategoryPickerProps) {
   const countryName = getCountryName(countryCode);
   const flag = getCountryFlag(countryCode);
 
-  const allZero = Object.values(counts).every((c) => c === 0);
+  const allZero = VISIBLE_CATEGORIES.every((cat) => (counts[cat] || 0) === 0);
 
   return (
     <div
@@ -76,7 +76,7 @@ export default function CategoryPicker({ countryCode, counts, loading, onSelect,
 
         {/* Categories */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '10px' }}>
-          {(Object.keys(CATEGORY_LABELS) as VideoCategory[]).map((cat) => {
+          {VISIBLE_CATEGORIES.map((cat) => {
             const count = counts[cat] || 0;
             const disabled = loading || count === 0;
             return (

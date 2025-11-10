@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
-import { CATEGORY_LABELS, type VideoCategory } from '@/types';
+import { CATEGORY_LABELS, VISIBLE_CATEGORIES, type VideoCategory } from '@/types';
 import AdminLayout from '@/components/AdminLayout';
 
 interface Stats {
@@ -48,15 +48,19 @@ export default function AdminDashboard() {
 
       if (error) throw error;
 
-      const total = submissions?.length || 0;
-      const pending = submissions?.filter(s => s.status === 'pending').length || 0;
-      const approved = submissions?.filter(s => s.status === 'approved').length || 0;
-      const rejected = submissions?.filter(s => s.status === 'rejected').length || 0;
-      const flagged = submissions?.filter(s => s.flagged).length || 0;
+      const visibleSubmissions = (submissions || []).filter((submission) =>
+        VISIBLE_CATEGORIES.includes(submission.category as VideoCategory)
+      );
+
+      const total = visibleSubmissions.length;
+      const pending = visibleSubmissions.filter(s => s.status === 'pending').length;
+      const approved = visibleSubmissions.filter(s => s.status === 'approved').length;
+      const rejected = visibleSubmissions.filter(s => s.status === 'rejected').length;
+      const flagged = visibleSubmissions.filter(s => s.flagged).length;
 
       // Count by country
       const countryMap = new Map<string, number>();
-      submissions?.forEach(s => {
+      visibleSubmissions.forEach(s => {
         countryMap.set(s.country_code, (countryMap.get(s.country_code) || 0) + 1);
       });
 
@@ -74,7 +78,7 @@ export default function AdminDashboard() {
         street_voices: 0,
       };
 
-      submissions?.forEach(s => {
+      visibleSubmissions.forEach(s => {
         if (s.category in byCategory) {
           byCategory[s.category as VideoCategory]++;
         }
@@ -261,7 +265,9 @@ export default function AdminDashboard() {
                   Submissions by Category
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {Object.entries(stats.byCategory).map(([category, count]) => (
+                  {VISIBLE_CATEGORIES.map((category) => {
+                    const count = stats.byCategory[category];
+                    return (
                     <div
                       key={category}
                       style={{
@@ -305,7 +311,7 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             </div>

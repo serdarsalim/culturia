@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
-import { CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
+import { CATEGORY_LABELS, VISIBLE_CATEGORIES, type VideoSubmission, type VideoCategory } from '@/types';
 import { getYouTubeThumbnail, getYouTubeWatchUrl } from '@/lib/youtube';
 import AdminLayout from '@/components/AdminLayout';
 
@@ -35,7 +35,11 @@ export default function AllSubmissions() {
 
       if (error) throw error;
 
-      setSubmissions(data || []);
+      const filtered = (data || []).filter((submission) =>
+        VISIBLE_CATEGORIES.includes(submission.category as VideoCategory)
+      );
+
+      setSubmissions(filtered);
     } catch (error) {
       console.error('Error fetching submissions:', error);
     } finally {
@@ -229,9 +233,9 @@ export default function AllSubmissions() {
                 }}
               >
                 <option value="all">All Categories</option>
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                {VISIBLE_CATEGORIES.map((key) => (
                   <option key={key} value={key}>
-                    {label}
+                    {CATEGORY_LABELS[key]}
                   </option>
                 ))}
               </select>

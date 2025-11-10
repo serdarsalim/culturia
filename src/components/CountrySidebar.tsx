@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCountryByCode } from '@/lib/countries';
-import { CATEGORY_LABELS, type VideoCategory, type VideoSubmission } from '@/types';
+import { CATEGORY_LABELS, VISIBLE_CATEGORIES, type VideoCategory, type VideoSubmission } from '@/types';
 import { supabase } from '@/lib/supabase/client';
 
 interface CountrySidebarProps {
@@ -223,7 +223,8 @@ export default function CountrySidebar({
       }}>
         {isMobile ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
+            {VISIBLE_CATEGORIES.map((category) => {
+              const label = CATEGORY_LABELS[category];
               const count = videoCounts[category];
               const hasVideos = count > 0;
               const colors = CATEGORY_COLORS[category];
@@ -278,7 +279,8 @@ export default function CountrySidebar({
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {(Object.entries(CATEGORY_LABELS) as [VideoCategory, string][]).map(([category, label]) => {
+              {VISIBLE_CATEGORIES.map((category) => {
+                const label = CATEGORY_LABELS[category];
                 const count = videoCounts[category];
                 const hasVideos = count > 0;
                 const colors = CATEGORY_COLORS[category];

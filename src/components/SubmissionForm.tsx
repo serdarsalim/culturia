@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
 import { extractYouTubeVideoId, isValidYouTubeUrl } from '@/lib/youtube';
-import { CATEGORY_LABELS, type VideoCategory } from '@/types';
+import { CATEGORY_LABELS, VISIBLE_CATEGORIES, type VideoCategory } from '@/types';
 
 interface SubmissionFormProps {
   countryCode: string;
@@ -258,7 +258,7 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
     }
   }
 
-  const categories: VideoCategory[] = ['inspiration', 'music', 'comedy', 'cooking', 'street_voices'];
+  const categories: VideoCategory[] = VISIBLE_CATEGORIES;
 
   function renderStatus(status: SubmissionStatus) {
     if (!status) return null;

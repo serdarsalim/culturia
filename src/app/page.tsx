@@ -10,7 +10,15 @@ import SubmissionForm from '@/components/SubmissionForm';
 import ProfileModal from '@/components/ProfileModal';
 import CategoryPicker from '@/components/CategoryPicker';
 import CategoryInfoCard from '@/components/CategoryInfoCard';
-import type { VideoSubmission, VideoCategory } from '@/types';
+import { VISIBLE_CATEGORIES, CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
+
+const CATEGORY_ICON_MAP: Record<VideoCategory, string> = {
+  inspiration: '💡',
+  music: '🎵',
+  comedy: '😄',
+  cooking: '🍳',
+  street_voices: '🎤',
+};
 
 export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -47,7 +55,7 @@ export default function Home() {
   });
   const pendingSubmissionCountryRef = useRef<string | null>(null);
   const [showCategoryInfo, setShowCategoryInfo] = useState(false);
-  const [categoryInfoCategory, setCategoryInfoCategory] = useState<VideoCategory>('inspiration');
+  const [categoryInfoCategory, setCategoryInfoCategory] = useState<VideoCategory>(VISIBLE_CATEGORIES[0]);
 
   // Set of countries that currently have at least one approved video
   const countriesWithVideos = useMemo(() => {
@@ -153,7 +161,15 @@ export default function Home() {
 
       const submissions = submissionsResult.data || [];
 
-      setProfileData({ favorites, submissions });
+      const visibleFavorites = favorites.filter((fav) =>
+        VISIBLE_CATEGORIES.includes(fav.category)
+      );
+      const visibleSubmissions = submissions.filter(
+        (submission: VideoSubmission) =>
+          VISIBLE_CATEGORIES.includes(submission.category as VideoCategory)
+      );
+
+      setProfileData({ favorites: visibleFavorites, submissions: visibleSubmissions });
     } catch (error) {
       console.error('Error preloading profile data:', error);
     }
@@ -190,6 +206,28 @@ export default function Home() {
     }
   }
 
+  function getCategoryCountsForCountry(countryCode: string | null): Record<VideoCategory, number> {
+    const counts: Record<VideoCategory, number> = {
+      inspiration: 0,
+      music: 0,
+      comedy: 0,
+      cooking: 0,
+      street_voices: 0,
+    };
+
+    if (!countryCode) {
+      return counts;
+    }
+
+    videoCache.forEach((video) => {
+      if (video.country_code === countryCode) {
+        counts[video.category as VideoCategory]++;
+      }
+    });
+
+    return counts;
+  }
+
   // Fetch and cache ALL approved videos
   async function refreshVideoCache() {
     try {
@@ -203,7 +241,10 @@ export default function Home() {
       if (error) throw error;
 
       const videos = data || [];
-      setVideoCache(videos);
+      const filteredVideos = videos.filter((video) =>
+        VISIBLE_CATEGORIES.includes(video.category as VideoCategory)
+      );
+      setVideoCache(filteredVideos);
       setVideoCacheReady(true);
 
       // Calculate category counts from cached data
@@ -215,12 +256,12 @@ export default function Home() {
         street_voices: 0,
       };
 
-      videos.forEach((video) => {
+      filteredVideos.forEach((video) => {
         counts[video.category as VideoCategory]++;
       });
 
       setCategoryCounts(counts);
-      console.log(`✅ Cache refreshed: ${videos.length} videos, counts:`, counts);
+      console.log(`✅ Cache refreshed: ${filteredVideos.length} videos (visible cats), counts:`, counts);
     } catch (error) {
       console.error('Error refreshing video cache:', error);
     }
@@ -810,13 +851,10 @@ export default function Home() {
                 gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : '1fr',
                 gap: isMobile ? '10px' : '8px'
               }}>
-                {([
-                  { key: 'inspiration', icon: '💡', label: 'Inspiration' },
-                  { key: 'music', icon: '🎵', label: 'Music' },
-                  { key: 'comedy', icon: '😄', label: 'Comedy' },
-                  { key: 'cooking', icon: '🍳', label: 'Cooking' },
-                  { key: 'street_voices', icon: '🎤', label: 'Street Voices' },
-                ] as { key: VideoCategory; icon: string; label: string }[]).map(({ key, icon, label }) => (
+                {VISIBLE_CATEGORIES.map((key) => {
+                  const icon = CATEGORY_ICON_MAP[key];
+                  const label = CATEGORY_LABELS[key];
+                  return (
                   <button
                     key={key}
                     onClick={() => handleGlobalCategoryClick(key)}
@@ -839,7 +877,7 @@ export default function Home() {
                     <span style={{ fontSize: '20px' }}>{icon}</span>
                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{label}</span>
                   </button>
-                ))}
+                )})}
               </div>
             </div>
 
@@ -918,13 +956,7 @@ export default function Home() {
           onClose={handleCloseVideo}
           onNext={handleNextVideo}
           onSubmitVideo={handleOpenSubmitFromPlayer}
-          categoryCounts={{
-            inspiration: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'inspiration').length,
-            music: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'music').length,
-            comedy: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'comedy').length,
-            cooking: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'cooking').length,
-            street_voices: videoCache.filter(v => v.country_code === currentVideo.video.country_code && v.category === 'street_voices').length,
-          }}
+          categoryCounts={getCategoryCountsForCountry(currentVideo.video.country_code)}
           onChangeCategory={handleChangeCategoryInPlayer}
         />
       )}
@@ -955,13 +987,7 @@ export default function Home() {
       {showCategoryPicker && pickerCountry && (
         <CategoryPicker
           countryCode={pickerCountry}
-          counts={{
-            inspiration: videoCache.filter(v => v.country_code === pickerCountry && v.category === 'inspiration').length,
-            music: videoCache.filter(v => v.country_code === pickerCountry && v.category === 'music').length,
-            comedy: videoCache.filter(v => v.country_code === pickerCountry && v.category === 'comedy').length,
-            cooking: videoCache.filter(v => v.country_code === pickerCountry && v.category === 'cooking').length,
-            street_voices: videoCache.filter(v => v.country_code === pickerCountry && v.category === 'street_voices').length,
-          }}
+          counts={getCategoryCountsForCountry(pickerCountry)}
           loading={!videoCacheReady}
           onSelect={(cat) => {
             setShowCategoryPicker(false);
