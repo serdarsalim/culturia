@@ -37,6 +37,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
   const [isMobile, setIsMobile] = useState(false);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const [showFullTitle, setShowFullTitle] = useState(false);
+  const [playbackBlocked, setPlaybackBlocked] = useState(false);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -246,8 +247,18 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
       autoplay: 1,
       modestbranding: 1,
       rel: 0,
+      playsinline: 1,
     },
   };
+
+  useEffect(() => {
+    setPlaybackBlocked(false);
+  }, [video.id]);
+
+  function handlePlayerError(event: YouTubeEvent) {
+    console.warn('YouTube player error:', event.data, video.youtube_video_id);
+    setPlaybackBlocked(true);
+  }
 
   return (
     <div
@@ -351,6 +362,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
             opts={opts}
             onReady={onPlayerReady}
             onEnd={onPlayerEnd}
+            onError={handlePlayerError}
             style={{
               position: 'absolute',
               inset: 0,
@@ -358,6 +370,41 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               height: '100%'
             }}
           />
+          {playbackBlocked && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              padding: '20px',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', lineHeight: 1.4 }}>
+                This video can only be watched on YouTube on your device.
+              </p>
+              <a
+                href={`https://www.youtube.com/watch?v=${video.youtube_video_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  backgroundColor: '#f97316',
+                  cursor: 'pointer',
+                  textDecoration: 'none'
+                }}
+              >
+                Open on YouTube
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Title directly under the video */}

@@ -517,7 +517,7 @@ export default function Home() {
             signedInLabel={user ? identityDisplay : null}
           />
         ) : (
-          <div className="h-full flex flex-col" style={{ padding: isMobile ? '16px 24px' : '32px' }}>
+          <div className="h-full flex flex-col" style={{ padding: isMobile ? '34px 16px 16px' : '32px' }}>
             {/* Header - Logo and Auth Links */}
             {isMobile ? (
               <>

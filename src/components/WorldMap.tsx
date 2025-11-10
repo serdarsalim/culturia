@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Marker } from 'react-simple-maps';
 import countries from '@/lib/countries';
 
@@ -71,6 +71,19 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
   const [tooltip, setTooltip] = useState<{ name: string; x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 20]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const maxZoom = isMobile ? 20 : 10;
 
   return (
     <div
@@ -124,10 +137,20 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
         className="w-full h-full"
       >
         <ZoomableGroup
-          center={[0, 20]}
-          zoom={1}
+          center={center}
+          zoom={zoom}
           minZoom={1}
-          maxZoom={8}
+          maxZoom={maxZoom}
+          onMoveEnd={(position) => {
+            if (position?.coordinates) {
+              setCenter(position.coordinates as [number, number]);
+            }
+            if (typeof (position as any)?.zoom === 'number') {
+              setZoom((position as any).zoom);
+            } else if (typeof (position as any)?.k === 'number') {
+              setZoom((position as any).k);
+            }
+          }}
         >
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
