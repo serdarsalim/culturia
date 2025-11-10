@@ -496,23 +496,6 @@ export default function Home() {
     ? `${primaryIdentity} • ${secondaryIdentity}`
     : primaryIdentity;
 
-  const userIdentityMark = user ? (
-    <div style={{
-      marginTop: 'auto',
-      padding: '16px',
-      fontSize: '12px',
-      color: '#475569',
-      textAlign: 'center'
-    }}>
-      <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '11px', color: '#94a3b8', marginRight: '6px' }}>
-        Signed in as:
-      </span>
-      <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '12px' }}>
-        {identityDisplay}
-      </span>
-    </div>
-  ) : null;
-
   return (
     <div className="home-layout h-screen overflow-hidden">
       {/* Sidebar - bottom on mobile, left on desktop */}
@@ -882,7 +865,7 @@ export default function Home() {
             </div>
 
             {/* Footer - Subtitle and Links */}
-            <div style={{ marginTop: isMobile ? '60px' : 'auto', paddingTop: isMobile ? '0' : '24px', paddingBottom: isMobile ? '80px' : '60px' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '24px', paddingBottom: isMobile ? '32px' : '60px' }}>
               <p style={{
                 fontSize: isMobile ? '13px' : '13px',
                 color: '#4b5563',
@@ -892,6 +875,28 @@ export default function Home() {
               }}>
                 Discover authentic cultural content from around the world
               </p>
+              {user && (
+                <div style={{
+                  fontSize: '11px',
+                  color: '#6b7280',
+                  textAlign: isMobile ? 'center' : 'left',
+                  marginTop: '-4px',
+                  marginBottom: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                  justifyContent: isMobile ? 'center' : 'flex-start',
+                  width: '100%'
+                }}>
+                  <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '10px', color: '#94a3b8' }}>
+                    Signed in as:
+                  </span>
+                  <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '12px' }}>
+                    {identityDisplay}
+                  </span>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '16px', fontSize: '12px', justifyContent: isMobile ? 'center' : 'flex-start' }}>
                 <a
                   href="/terms"
@@ -933,7 +938,6 @@ export default function Home() {
                 </a>
               </div>
             </div>
-            {userIdentityMark}
           </div>
         )}
       </div>

@@ -402,6 +402,23 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
               <li>Content should be culturally authentic and appropriate</li>
               <li>You can submit one video per category per country</li>
             </ul>
+            <div style={{ marginTop: '16px', fontSize: '13px', color: '#1e40af' }}>
+              <p style={{ fontWeight: 600, marginBottom: '8px' }}>What we look for in each category:</p>
+              <ul style={{ paddingLeft: '20px', margin: 0, lineHeight: '1.7' }}>
+                <li>
+                  <strong>Talks:</strong> People speaking in their native language—interviews, speeches, discussions, presentations, or conversations. Must include authentic dialogue.
+                </li>
+                <li>
+                  <strong>Music:</strong> Musical performances, songs, or musicians playing—anything from traditional folk to modern genres. Lyrics in the local language are preferred.
+                </li>
+                <li>
+                  <strong>Comedy:</strong> Funny content that makes people laugh—stand-up, sketches, or humorous moments. Humor should be delivered in the native language.
+                </li>
+                <li>
+                  <strong>Food:</strong> Cooking, eating, or food culture—street food, home cooking, or culinary rituals. Must showcase authentic local cuisine with narration or dialogue.
+                </li>
+              </ul>
+            </div>
           </div>
         )}
 
