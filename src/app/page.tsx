@@ -366,14 +366,23 @@ export default function Home() {
       return;
     }
 
+    // Get filtered videos based on current map source
+    let availableVideos = videoCache.filter(v => v.country_code === countryCode);
+
+    // Apply mapSources filter
+    if (mapSources.mine && user?.id) {
+      availableVideos = availableVideos.filter(v => v.user_id === user.id);
+    } else if (mapSources.favorites && profileData?.favorites) {
+      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video.id));
+      availableVideos = availableVideos.filter(v => favoriteVideoIds.has(v.id));
+    }
+
     const categoriesToTry = selectedCategoryFilter
       ? [selectedCategoryFilter, ...VISIBLE_CATEGORIES.filter(cat => cat !== selectedCategoryFilter)]
       : VISIBLE_CATEGORIES;
 
     for (const categoryOption of categoriesToTry) {
-      const matches = videoCache.filter(
-        v => v.country_code === countryCode && v.category === categoryOption
-      );
+      const matches = availableVideos.filter(v => v.category === categoryOption);
 
       if (matches.length > 0) {
         const randomVideo = matches[Math.floor(Math.random() * matches.length)];
@@ -383,7 +392,7 @@ export default function Home() {
       }
     }
 
-    const latest = videoCache.find(v => v.country_code === countryCode);
+    const latest = availableVideos[0];
     if (latest) {
       setCurrentVideo({ video: latest, category: latest.category as VideoCategory });
       setSelectedCountry(null);
