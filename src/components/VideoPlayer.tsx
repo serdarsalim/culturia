@@ -996,7 +996,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
 
         {/* Comment Section - Right side on desktop, below on mobile */}
         <div style={{
-          width: isMobile ? '100%' : '380px',
+          width: isMobile ? '100%' : '300px',
           borderLeft: isMobile ? 'none' : '1px solid #333333',
           borderTop: isMobile ? '1px solid #333333' : 'none',
           backgroundColor: '#0a0a0a',
