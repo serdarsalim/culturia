@@ -41,6 +41,8 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
   const [showFullTitle, setShowFullTitle] = useState(false);
   const [playbackBlocked, setPlaybackBlocked] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoDurationRef = useRef<number | null>(null);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -246,9 +248,25 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
 
   function onPlayerReady(event: YouTubeEvent) {
     playerRef.current = event.target;
+
+    // Get video duration and set up auto-advance timer
+    const duration = event.target.getDuration();
+    videoDurationRef.current = duration;
+
+    // Clear any existing timer
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+    }
+
+    // Set timer to auto-advance after video duration (works in background tabs)
+    if (duration && duration > 0) {
+      autoAdvanceTimerRef.current = setTimeout(() => {
+        handleAutoAdvance();
+      }, duration * 1000 + 500); // Add 500ms buffer
+    }
   }
 
-  async function onPlayerEnd() {
+  function handleAutoAdvance() {
     // Auto-play next video in playlist when current one ends
     if (playlist && playlist.length > 0 && onSelectVideo) {
       const currentIndex = playlist.findIndex(v => v.id === video.id);
@@ -266,6 +284,16 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
     }
   }
 
+  async function onPlayerEnd() {
+    // Clear the timer since video ended naturally
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+
+    handleAutoAdvance();
+  }
+
   const opts = {
     width: '100%',
     height: '100%',
@@ -279,6 +307,14 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
 
   useEffect(() => {
     setPlaybackBlocked(false);
+
+    // Clear timer when video changes
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      }
+    };
   }, [video.id]);
 
   function handlePlayerError(event: YouTubeEvent) {
