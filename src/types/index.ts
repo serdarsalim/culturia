@@ -5,7 +5,7 @@ export interface Country {
   languages: string[];
 }
 
-export type VideoCategory = 'inspiration' | 'music' | 'comedy' | 'cooking' | 'street_voices';
+export type VideoCategory = 'inspiration' | 'music' | 'comedy' | 'daily_life' | 'talks';
 
 export interface VideoSubmission {
   id: string;
@@ -57,12 +57,12 @@ export const CATEGORY_LABELS: Record<VideoCategory, string> = {
   inspiration: 'Inspiration',
   music: 'Music',
   comedy: 'Comedy',
-  cooking: 'Daily Life',
-  street_voices: 'Talks',
+  daily_life: 'Daily Life',
+  talks: 'Talks',
 };
 
 // Only expose the public-facing categories in UI components
-export const VISIBLE_CATEGORIES: VideoCategory[] = ['music', 'comedy', 'cooking', 'street_voices'];
+export const VISIBLE_CATEGORIES: VideoCategory[] = ['music', 'comedy', 'daily_life', 'talks'];
 
 export const FLAG_REASONS = [
   { value: 'broken', label: 'Video is broken or unavailable' },

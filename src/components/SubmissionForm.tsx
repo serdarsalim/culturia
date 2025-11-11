@@ -31,8 +31,8 @@ export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuth
     inspiration: { url: '', title: '', status: null, originalUrl: '', id: null },
     music: { url: '', title: '', status: null, originalUrl: '', id: null },
     comedy: { url: '', title: '', status: null, originalUrl: '', id: null },
-    cooking: { url: '', title: '', status: null, originalUrl: '', id: null },
-    street_voices: { url: '', title: '', status: null, originalUrl: '', id: null },
+    daily_life: { url: '', title: '', status: null, originalUrl: '', id: null },
+    talks: { url: '', title: '', status: null, originalUrl: '', id: null },
   });
   const [loading, setLoading] = useState(false);
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
@@ -99,8 +99,8 @@ const [deleteToast, setDeleteToast] = useState<string | null>(null);
             inspiration: { url: '', title: '', status: null, originalUrl: '', id: null },
             music: { url: '', title: '', status: null, originalUrl: '', id: null },
             comedy: { url: '', title: '', status: null, originalUrl: '', id: null },
-            cooking: { url: '', title: '', status: null, originalUrl: '', id: null },
-            street_voices: { url: '', title: '', status: null, originalUrl: '', id: null },
+            daily_life: { url: '', title: '', status: null, originalUrl: '', id: null },
+            talks: { url: '', title: '', status: null, originalUrl: '', id: null },
           };
 
           submissions.forEach((submission) => {

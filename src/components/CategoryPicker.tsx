@@ -16,8 +16,8 @@ const CATEGORY_LABELS: Record<VideoCategory, { label: string; icon: string }> = 
   inspiration: { label: 'Inspiration', icon: '💡' },
   music: { label: 'Music', icon: '🎵' },
   comedy: { label: 'Comedy', icon: '😄' },
-  cooking: { label: 'Daily Life', icon: '📹' },
-  street_voices: { label: 'Talks', icon: '🎤' },
+  daily_life: { label: 'Daily Life', icon: '📹' },
+  talks: { label: 'Talks', icon: '🎤' },
 };
 
 export default function CategoryPicker({ countryCode, counts, loading, onSelect, onSubmitVideos, onClose }: CategoryPickerProps) {
