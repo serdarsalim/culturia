@@ -57,7 +57,7 @@ export const CATEGORY_LABELS: Record<VideoCategory, string> = {
   inspiration: 'Inspiration',
   music: 'Music',
   comedy: 'Comedy',
-  cooking: 'Food',
+  cooking: 'Daily Life',
   street_voices: 'Talks',
 };
 

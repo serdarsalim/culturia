@@ -484,7 +484,7 @@ const [deleteToast, setDeleteToast] = useState<string | null>(null);
                   <strong>Comedy:</strong> Funny content that makes people laugh—stand-up, sketches, or humorous moments. Humor should be delivered in the native language.
                 </li>
                 <li>
-                  <strong>Food:</strong> Cooking, eating, or food culture—street food, home cooking, or culinary rituals. Must showcase authentic local cuisine with narration or dialogue.
+                  <strong>Daily Life:</strong> Everyday moments that capture authentic life—market scenes, local customs, daily routines, or cultural practices. Should feature people speaking in their native language.
                 </li>
               </ul>
             </div>
