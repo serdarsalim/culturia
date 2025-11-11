@@ -44,8 +44,8 @@ export default function Home() {
     inspiration: 0,
     music: 0,
     comedy: 0,
-    cooking: 0,
-    street_voices: 0,
+    daily_life: 0,
+    talks: 0,
   });
   const [mapSources, setMapSources] = useState<{ all: boolean; favorites: boolean; mine: boolean }>({
     all: true,
@@ -220,8 +220,8 @@ export default function Home() {
       inspiration: 0,
       music: 0,
       comedy: 0,
-      cooking: 0,
-      street_voices: 0,
+      daily_life: 0,
+      talks: 0,
     };
 
     if (!countryCode) {
@@ -293,8 +293,8 @@ export default function Home() {
         inspiration: 0,
         music: 0,
         comedy: 0,
-        cooking: 0,
-        street_voices: 0,
+        daily_life: 0,
+        talks: 0,
       };
 
       combinedVideos.forEach((video) => {

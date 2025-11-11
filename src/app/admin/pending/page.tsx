@@ -67,8 +67,8 @@ export default function PendingSubmissions() {
     inspiration: '✨',
     music: '🎵',
     comedy: '😂',
-    cooking: '🍳',
-    street_voices: '🗣️',
+    daily_life: '📹',
+    talks: '🎤',
   };
 
   return (

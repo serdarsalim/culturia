@@ -43,15 +43,15 @@ const CATEGORY_COLORS = {
     text: 'text-green-700',
     icon: '😄',
   },
-  cooking: {
+  daily_life: {
     bg: 'from-red-50 to-orange-50',
     border: 'border-red-300',
     hoverBg: 'hover:bg-gradient-to-br hover:from-red-100 hover:to-orange-100',
     hoverBorder: 'hover:border-red-400',
     text: 'text-red-700',
-    icon: '🍳',
+    icon: '📹',
   },
-  street_voices: {
+  talks: {
     bg: 'from-blue-50 to-indigo-50',
     border: 'border-blue-300',
     hoverBg: 'hover:bg-gradient-to-br hover:from-blue-100 hover:to-indigo-100',
@@ -77,8 +77,8 @@ export default function CountrySidebar({
     inspiration: 0,
     music: 0,
     comedy: 0,
-    cooking: 0,
-    street_voices: 0,
+    daily_life: 0,
+    talks: 0,
   });
   const [isMobile, setIsMobile] = useState(false);
 
@@ -101,8 +101,8 @@ export default function CountrySidebar({
         inspiration: 0,
         music: 0,
         comedy: 0,
-        cooking: 0,
-        street_voices: 0,
+        daily_life: 0,
+        talks: 0,
       };
 
       // Filter and count videos for this country

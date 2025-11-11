@@ -29,8 +29,8 @@ export default function AdminDashboard() {
       inspiration: 0,
       music: 0,
       comedy: 0,
-      cooking: 0,
-      street_voices: 0,
+      daily_life: 0,
+      talks: 0,
     },
   });
 
@@ -74,8 +74,8 @@ export default function AdminDashboard() {
         inspiration: 0,
         music: 0,
         comedy: 0,
-        cooking: 0,
-        street_voices: 0,
+        daily_life: 0,
+        talks: 0,
       };
 
       visibleSubmissions.forEach(s => {
@@ -112,8 +112,8 @@ export default function AdminDashboard() {
     inspiration: '✨',
     music: '🎵',
     comedy: '😂',
-    cooking: '🍳',
-    street_voices: '🗣️',
+    daily_life: '📹',
+    talks: '🎤',
   };
 
   return (

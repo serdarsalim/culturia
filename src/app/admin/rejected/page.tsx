@@ -86,8 +86,8 @@ export default function RejectedSubmissions() {
     inspiration: '✨',
     music: '🎵',
     comedy: '😂',
-    cooking: '🍳',
-    street_voices: '🗣️',
+    daily_life: '📹',
+    talks: '🎤',
   };
 
   return (

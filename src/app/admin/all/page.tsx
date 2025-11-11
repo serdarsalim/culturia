@@ -126,8 +126,8 @@ export default function AllSubmissions() {
     inspiration: '✨',
     music: '🎵',
     comedy: '😂',
-    cooking: '🍳',
-    street_voices: '🗣️',
+    daily_life: '📹',
+    talks: '🎤',
   };
 
   // Get unique countries from submissions

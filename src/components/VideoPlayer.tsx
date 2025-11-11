@@ -22,8 +22,8 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
     inspiration: '💡',
     music: '🎵',
     comedy: '😄',
-    cooking: '🍳',
-    street_voices: '🎤',
+    daily_life: '📹',
+    talks: '🎤',
   };
   const [showFlagModal, setShowFlagModal] = useState(false);
   const [flagging, setFlagging] = useState(false);
