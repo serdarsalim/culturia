@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
 import { CATEGORY_LABELS, type VideoCategory, type VideoSubmission } from '@/types';
+import EditSubmissionModal from './EditSubmissionModal';
 
 interface ProfileModalProps {
   onClose: () => void;
@@ -49,6 +50,7 @@ export default function ProfileModal({
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(!!initialProfile);
   const [initialUsername, setInitialUsername] = useState(initialProfile?.username || '');
+  const [editingSubmission, setEditingSubmission] = useState<VideoSubmission | null>(null);
   const [initialDisplayName, setInitialDisplayName] = useState(initialProfile?.display_name || '');
   const [isPrivate, setIsPrivate] = useState<boolean | null>(
     initialProfile?.is_private ?? false
@@ -572,10 +574,7 @@ export default function ProfileModal({
                           </div>
                           <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', alignItems: 'center', flexShrink: 0 }}>
                             <button
-                              onClick={() => {
-                                onEditSubmission(video.country_code);
-                                onClose();
-                              }}
+                              onClick={() => setEditingSubmission(video)}
                               style={{
                                 padding: isMobile ? '4px 6px' : '6px 12px',
                                 borderRadius: '4px',
@@ -845,6 +844,25 @@ export default function ProfileModal({
           </div>
         )}
       </div>
+
+      {/* Edit Submission Modal */}
+      {editingSubmission && (
+        <EditSubmissionModal
+          submission={editingSubmission}
+          onClose={() => setEditingSubmission(null)}
+          onSuccess={() => {
+            setEditingSubmission(null);
+            fetchAllData();
+            setToastMessage({
+              title: 'Success',
+              description: 'Submission updated successfully',
+              type: 'success'
+            });
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+          }}
+        />
+      )}
     </div>
   );
 }
