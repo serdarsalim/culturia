@@ -2,18 +2,18 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { type CountryComment } from '@/types';
+import { type VideoComment } from '@/types';
 
 interface CommentSectionProps {
-  countryCode: string;
+  videoId: string;
   isMobile: boolean;
 }
 
-export default function CommentSection({ countryCode, isMobile }: CommentSectionProps) {
-  const [comments, setComments] = useState<CountryComment[]>([]);
+export default function CommentSection({ videoId, isMobile }: CommentSectionProps) {
+  const [comments, setComments] = useState<VideoComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [userComment, setUserComment] = useState<CountryComment | null>(null);
+  const [userComment, setUserComment] = useState<VideoComment | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -50,18 +50,18 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
     }
   }, [isEditing, isMobile]);
 
-  // Load comments for this country
+  // Load comments for this video
   useEffect(() => {
     loadComments();
 
     // Set up real-time subscription
     const channel = supabase
-      .channel(`comments_${countryCode}`)
+      .channel(`comments_${videoId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'country_comments',
-        filter: `country_code=eq.${countryCode}`
+        table: 'video_comments',
+        filter: `video_id=eq.${videoId}`
       }, () => {
         loadComments();
       })
@@ -70,16 +70,16 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [countryCode, user]);
+  }, [videoId, user]);
 
   async function loadComments() {
     setLoading(true);
     try {
-      // Fetch all comments for this country, sorted by updated_at descending
+      // Fetch all comments for this video, sorted by updated_at descending
       const { data: commentsData, error: commentsError } = await supabase
-        .from('country_comments')
+        .from('video_comments')
         .select('*')
-        .eq('country_code', countryCode)
+        .eq('video_id', videoId)
         .order('updated_at', { ascending: false });
 
       if (commentsError) throw commentsError;
@@ -180,7 +180,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
       if (userComment) {
         // Update existing comment
         const { error } = await supabase
-          .from('country_comments')
+          .from('video_comments')
           .update({ content: commentText.trim() })
           .eq('id', userComment.id);
 
@@ -195,10 +195,10 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
       } else {
         // Insert new comment
         const { error } = await supabase
-          .from('country_comments')
+          .from('video_comments')
           .insert({
             user_id: user.id,
-            country_code: countryCode,
+            video_id: videoId,
             content: commentText.trim()
           });
 
@@ -245,7 +245,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
 
     try {
       const { error } = await supabase
-        .from('country_comments')
+        .from('video_comments')
         .delete()
         .eq('id', userComment.id);
 
@@ -494,7 +494,6 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
       {(!isMobile || isExpanded) && (
       <div style={{
         padding: isMobile ? '12px' : '16px',
-        borderTop: '1px solid #333333',
         backgroundColor: '#0a0a0a'
       }}>
         {!user ? (
@@ -515,7 +514,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
               ref={textareaRef}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Share your perspective on this country..."
+              placeholder="Share your perspective on this video..."
               maxLength={500}
               style={{
                 width: '100%',
@@ -608,7 +607,7 @@ export default function CommentSection({ countryCode, isMobile }: CommentSection
                   }
                 }}
               >
-                {submitting ? 'Submitting...' : userComment ? 'Save' : 'Share Perspective'}
+                {submitting ? 'Submitting...' : userComment ? 'Save' : 'Comment'}
               </button>
             </div>
           </div>

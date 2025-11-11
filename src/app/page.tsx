@@ -531,6 +531,32 @@ export default function Home() {
     setSelectedCategoryFilter(prev => (prev === category ? null : category));
   }
 
+  function handleMapSourceToggle(key: 'all' | 'favorites' | 'mine', value: boolean) {
+    setMapSources(prev => {
+      const next = { ...prev };
+
+      if (key === 'all') {
+        next.all = value;
+        if (value) {
+          next.favorites = false;
+          next.mine = false;
+        }
+      } else if (key === 'favorites') {
+        next.favorites = value;
+        if (value) {
+          next.all = false;
+        }
+      } else if (key === 'mine') {
+        next.mine = value;
+        if (value) {
+          next.all = false;
+        }
+      }
+
+      return next;
+    });
+  }
+
   const sanitizedUsername = userProfile?.username ? userProfile.username.replace(/^@/, '').trim() : '';
   const primaryIdentity =
     userProfile?.display_name?.trim() ||
@@ -1087,7 +1113,7 @@ export default function Home() {
           initialProfile={userProfile}
           onProfileSettingsChange={handleProfileSettingsChange}
           mapSources={mapSources}
-          onToggleMapSource={(key, value) => setMapSources((prev) => ({ ...prev, [key]: value }))}
+          onToggleMapSource={handleMapSourceToggle}
           initialTab={profileModalTab}
         />
       )}

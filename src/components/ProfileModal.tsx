@@ -68,8 +68,23 @@ export default function ProfileModal({
     if (!initialData) {
       fetchAllData();
     }
-    fetchProfile();
-  }, []);
+    if (!initialProfile) {
+      fetchProfile();
+    } else {
+      setProfileLoaded(true);
+    }
+  }, [initialProfile]);
+
+  useEffect(() => {
+    if (initialProfile) {
+      setUsername(initialProfile.username || '');
+      setDisplayName(initialProfile.display_name || '');
+      setIsPrivate(initialProfile.is_private ?? false);
+      setInitialUsername(initialProfile.username || '');
+      setInitialDisplayName(initialProfile.display_name || '');
+      setInitialIsPrivate(initialProfile.is_private ?? false);
+    }
+  }, [initialProfile]);
 
   // Refetch when tab changes
   useEffect(() => {

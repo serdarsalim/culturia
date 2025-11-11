@@ -40,15 +40,18 @@ export interface AdminUser {
   created_at: string;
 }
 
-export interface CountryComment {
+export interface VideoComment {
   id: string;
   user_id: string;
-  country_code: string;
+  video_id: string;
   content: string;
   created_at: string;
   updated_at: string;
   user_display?: string; // Display name from user_profiles
 }
+
+// Legacy type alias for backwards compatibility during migration
+export type CountryComment = VideoComment;
 
 export const CATEGORY_LABELS: Record<VideoCategory, string> = {
   inspiration: 'Inspiration',

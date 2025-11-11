@@ -813,7 +813,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
           flexDirection: 'column',
           maxHeight: isMobile ? '400px' : '100%'
         }}>
-          <CommentSection countryCode={video.country_code} isMobile={isMobile} />
+          <CommentSection videoId={video.id} isMobile={isMobile} />
         </div>
       </div>
 
