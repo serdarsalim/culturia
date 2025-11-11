@@ -449,6 +449,8 @@ export default function Home() {
       display_name: updates.display_name,
       is_private: updates.is_private,
     });
+    // Refresh video cache to update visibility filters
+    refreshVideoCache();
   }
 
   function handleNextVideo() {
