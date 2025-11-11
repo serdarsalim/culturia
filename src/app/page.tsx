@@ -6,7 +6,7 @@ import WorldMap from '@/components/WorldMap';
 import CountrySidebar from '@/components/CountrySidebar';
 import VideoPlayer from '@/components/VideoPlayer';
 import AuthModal from '@/components/AuthModal';
-import SubmissionForm from '@/components/SubmissionForm';
+import AddVideoModal from '@/components/AddVideoModal';
 import ProfileModal from '@/components/ProfileModal';
 import CategoryPicker from '@/components/CategoryPicker';
 import { VISIBLE_CATEGORIES, CATEGORY_LABELS, type VideoSubmission, type VideoCategory } from '@/types';
@@ -1113,14 +1113,13 @@ export default function Home() {
 
       {/* Submission Form */}
       {showSubmissionForm && selectedCountry && (
-        <SubmissionForm
+        <AddVideoModal
           countryCode={selectedCountry}
           onClose={() => {
             setShowSubmissionForm(false);
             setSelectedCountry(null);
           }}
           onSuccess={handleSubmissionSuccess}
-          onAuthRequired={() => setShowAuthModal(true)}
         />
       )}
 
