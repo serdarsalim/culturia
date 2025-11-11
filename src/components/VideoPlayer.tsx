@@ -430,17 +430,19 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                     }}
                   >
                     {/* Video Title */}
-                    <div style={{
-                      fontSize: '13px',
-                      fontWeight: isCurrentVideo ? 600 : 400,
-                      color: isCurrentVideo ? '#3b82f6' : '#ffffff',
-                      marginBottom: '6px',
-                      lineHeight: '1.4',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
+                    <div
+                      title={playlistVideo.title || 'Untitled Video'}
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: isCurrentVideo ? 600 : 400,
+                        color: isCurrentVideo ? '#3b82f6' : '#ffffff',
+                        marginBottom: '6px',
+                        lineHeight: '1.4',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
                       {playlistVideo.title || 'Untitled Video'}
                     </div>
 
