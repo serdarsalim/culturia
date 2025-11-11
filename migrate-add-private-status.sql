@@ -1,18 +1,25 @@
 BEGIN;
 
--- FIRST: Drop existing check constraint
+-- FIRST: Drop the unique constraint that limited one video per user/country/category
+ALTER TABLE video_submissions
+DROP CONSTRAINT IF EXISTS video_submissions_user_id_country_code_category_key;
+
+-- SECOND: Drop existing status check constraint
 ALTER TABLE video_submissions
 DROP CONSTRAINT IF EXISTS video_submissions_status_check;
 
--- SECOND: Add new check constraint with 'private' status
+-- THIRD: Add new check constraint with 'private' status
 ALTER TABLE video_submissions
 ADD CONSTRAINT video_submissions_status_check
 CHECK (status IN ('private', 'pending', 'approved', 'rejected'));
 
--- THIRD: Update any existing pending submissions to private (optional, depends on what you want)
--- Comment this out if you want to keep existing pending videos as pending
--- UPDATE video_submissions
--- SET status = 'private'
--- WHERE status = 'pending';
+-- FOURTH: Add was_approved column to track if video was ever approved
+ALTER TABLE video_submissions
+ADD COLUMN IF NOT EXISTS was_approved BOOLEAN DEFAULT FALSE;
+
+-- FIFTH: Set was_approved = true for all currently approved videos
+UPDATE video_submissions
+SET was_approved = TRUE
+WHERE status = 'approved';
 
 COMMIT;

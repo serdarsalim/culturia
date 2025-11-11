@@ -329,13 +329,16 @@ export default function ProfileModal({
 
   async function handleToggleVisibility(video: VideoSubmission) {
     try {
-      let newStatus: 'private' | 'pending';
+      let newStatus: 'private' | 'pending' | 'approved';
 
-      // Toggle between private and public (pending/approved both become private)
+      // Toggle between private and public
       if (video.status === 'private') {
-        newStatus = 'pending'; // Submit for review
+        // If video was previously approved, restore approved status
+        // Otherwise, submit for review (pending)
+        newStatus = video.was_approved ? 'approved' : 'pending';
       } else {
-        newStatus = 'private'; // Make private (works for both pending and approved)
+        // Make private (works for both pending and approved)
+        newStatus = 'private';
       }
 
       const { error } = await supabase
@@ -351,10 +354,16 @@ export default function ProfileModal({
       ));
 
       setToastMessage({
-        title: newStatus === 'pending' ? 'Submitted for Review' : 'Made Private',
-        description: newStatus === 'pending'
-          ? 'Your video has been submitted for admin approval'
-          : 'Your video is now private and removed from the map',
+        title: newStatus === 'private'
+          ? 'Made Private'
+          : newStatus === 'approved'
+            ? 'Published'
+            : 'Submitted for Review',
+        description: newStatus === 'private'
+          ? 'Your video is now private and removed from the map'
+          : newStatus === 'approved'
+            ? 'Your video is now live on the map'
+            : 'Your video has been submitted for admin approval',
         type: 'success'
       });
       setShowToast(true);

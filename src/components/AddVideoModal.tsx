@@ -128,10 +128,13 @@ export default function AddVideoModal({ countryCode, onClose, onSuccess }: AddVi
         >
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
           <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '12px', color: '#0f172a' }}>
-            Video Submitted!
+            Video Added!
           </h2>
-          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>
-            Your video has been submitted for review. You'll be notified once it's approved.
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', lineHeight: '1.6' }}>
+            Your video has been added and is currently <strong>private</strong> (only visible to you).
+          </p>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px', lineHeight: '1.6' }}>
+            Go to your profile to toggle it to <strong>public</strong> and submit it for review to appear on the map.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <button

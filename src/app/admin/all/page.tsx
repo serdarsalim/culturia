@@ -82,9 +82,16 @@ export default function AllSubmissions() {
 
   async function updateStatus(id: string, status: 'approved' | 'rejected' | 'pending') {
     try {
+      const updateData: any = { status };
+
+      // Set was_approved = true when approving
+      if (status === 'approved') {
+        updateData.was_approved = true;
+      }
+
       const { error } = await supabase
         .from('video_submissions')
-        .update({ status })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
