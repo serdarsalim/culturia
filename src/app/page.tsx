@@ -467,7 +467,7 @@ export default function Home() {
     if (mapSources.mine && user?.id) {
       matchingVideos = matchingVideos.filter(v => v.user_id === user.id);
     } else if (mapSources.favorites && profileData?.favorites) {
-      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video_id));
+      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video.id));
       matchingVideos = matchingVideos.filter(v => favoriteVideoIds.has(v.id));
     }
 
@@ -500,7 +500,7 @@ export default function Home() {
       filtered = filtered.filter(v => v.user_id === user.id);
     } else if (mapSources.favorites && profileData?.favorites) {
       // Only show favorited videos
-      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video_id));
+      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video.id));
       filtered = filtered.filter(v => favoriteVideoIds.has(v.id));
     }
 
@@ -521,7 +521,7 @@ export default function Home() {
     if (mapSources.mine && user?.id) {
       matches = matches.filter(v => v.user_id === user.id);
     } else if (mapSources.favorites && profileData?.favorites) {
-      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video_id));
+      const favoriteVideoIds = new Set(profileData.favorites.map(fav => fav.video.id));
       matches = matches.filter(v => favoriteVideoIds.has(v.id));
     }
 
