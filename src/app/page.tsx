@@ -632,6 +632,10 @@ export default function Home() {
         }
       }
 
+      if (!next.all && !next.favorites && !next.mine) {
+        next.all = true;
+      }
+
       // Save to localStorage
       localStorage.setItem('mapSources', JSON.stringify(next));
 
@@ -1180,6 +1184,7 @@ export default function Home() {
             setSelectedCountry(null);
           }}
           onSuccess={handleSubmissionSuccess}
+          onChange={refreshVideoCache}
         />
       )}
 

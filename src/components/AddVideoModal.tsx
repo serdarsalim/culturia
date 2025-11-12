@@ -9,9 +9,10 @@ interface AddVideoModalProps {
   countryCode: string;
   onClose: () => void;
   onSuccess: () => void;
+  onChange?: () => void;
 }
 
-export default function AddVideoModal({ countryCode, onClose, onSuccess }: AddVideoModalProps) {
+export default function AddVideoModal({ countryCode, onClose, onSuccess, onChange }: AddVideoModalProps) {
   const [category, setCategory] = useState<VideoCategory>(VISIBLE_CATEGORIES[0]);
   const [title, setTitle] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -78,6 +79,7 @@ export default function AddVideoModal({ countryCode, onClose, onSuccess }: AddVi
 
       if (insertError) throw insertError;
 
+      onChange?.();
       // Show success message
       setShowSuccess(true);
     } catch (err: any) {

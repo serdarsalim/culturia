@@ -26,7 +26,7 @@ type FormData = {
   };
 };
 
-export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuthRequired }: SubmissionFormProps) {
+export default function SubmissionForm({ countryCode, onClose, onSuccess, onAuthRequired, onChange }: SubmissionFormProps) {
   const [formData, setFormData] = useState<FormData>({
     inspiration: { url: '', title: '', status: null, originalUrl: '', id: null },
     music: { url: '', title: '', status: null, originalUrl: '', id: null },
@@ -248,6 +248,7 @@ const [deleteToast, setDeleteToast] = useState<string | null>(null);
         return;
       }
 
+      onChange?.();
       onSuccess();
     } catch (err: any) {
       console.error('Submission error:', err);
@@ -306,6 +307,7 @@ const [deleteToast, setDeleteToast] = useState<string | null>(null);
       const message = `${CATEGORY_LABELS[category]} video removed`;
       setDeleteToast(message);
       setTimeout(() => setDeleteToast(null), 2000);
+      onChange?.();
     } catch (err: any) {
       console.error('Delete submission error:', err);
       setError(err.message || 'Failed to delete video');

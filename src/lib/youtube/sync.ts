@@ -116,7 +116,7 @@ async function syncPlaylist(
       .eq('category', category)
       .single();
 
-    let playlistId: string;
+    let playlistId = '';
     let wasCreated = false;
 
     if (cachedPlaylist) {
