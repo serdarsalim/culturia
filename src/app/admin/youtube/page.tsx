@@ -38,6 +38,7 @@ export default function YouTubePage() {
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string[]>([]);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
   useEffect(() => {
     checkYouTubeStatus();
@@ -126,18 +127,24 @@ export default function YouTubePage() {
     }
   }
 
-  async function handleDisconnect() {
-    if (!confirm('Are you sure you want to disconnect YouTube?')) {
-      return;
-    }
+  async function confirmDisconnect() {
+    setShowDisconnectModal(false);
 
     try {
       await fetch('/api/auth/youtube/disconnect', { method: 'POST' });
       setYoutubeStatus({ connected: false, email: null });
-      alert('YouTube disconnected successfully');
+      // Show success in sync result banner
+      setSyncResult({
+        success: true,
+        playlistsCreated: 0,
+        playlistsUpdated: 0,
+        videosAdded: 0,
+        errors: [],
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('Error disconnecting YouTube:', error);
-      alert('Failed to disconnect YouTube');
+      setErrorDetails(['Failed to disconnect YouTube. Please try again.']);
+      setShowErrorModal(true);
     }
   }
 
@@ -235,7 +242,7 @@ export default function YouTubePage() {
               </div>
             </div>
             <button
-              onClick={handleDisconnect}
+              onClick={() => setShowDisconnectModal(true)}
               style={{
                 padding: '10px 20px',
                 backgroundColor: '#374151',
@@ -332,12 +339,16 @@ export default function YouTubePage() {
           marginBottom: '24px'
         }}>
           <div style={{ fontWeight: 600, marginBottom: '8px' }}>
-            {syncResult.success ? '✓ Sync Successful' : '⚠ Sync Completed with Errors'}
+            {syncResult.videosAdded === 0 && syncResult.playlistsCreated === 0 && syncResult.playlistsUpdated === 0
+              ? '✓ YouTube Disconnected Successfully'
+              : syncResult.success ? '✓ Sync Successful' : '⚠ Sync Completed with Errors'}
           </div>
-          <div style={{ fontSize: '13px' }}>
-            {syncResult.videosAdded} videos synced to {syncResult.playlistsCreated + syncResult.playlistsUpdated} playlists
-            ({syncResult.playlistsCreated} created, {syncResult.playlistsUpdated} updated)
-          </div>
+          {(syncResult.videosAdded > 0 || syncResult.playlistsCreated > 0 || syncResult.playlistsUpdated > 0) && (
+            <div style={{ fontSize: '13px' }}>
+              {syncResult.videosAdded} videos synced to {syncResult.playlistsCreated + syncResult.playlistsUpdated} playlists
+              ({syncResult.playlistsCreated} created, {syncResult.playlistsUpdated} updated)
+            </div>
+          )}
         </div>
       )}
 
@@ -492,6 +503,93 @@ export default function YouTubePage() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Disconnect Confirmation Modal */}
+      {showDisconnectModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+          onClick={() => setShowDisconnectModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#1a1a1a',
+              borderRadius: '16px',
+              maxWidth: '500px',
+              width: '100%',
+              border: '1px solid #f97316',
+              boxShadow: '0 25px 50px -12px rgba(249, 115, 22, 0.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '24px',
+              borderBottom: '1px solid #333333'
+            }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#f97316', marginBottom: '8px' }}>
+                🔌 Disconnect YouTube?
+              </h2>
+              <p style={{ fontSize: '14px', color: '#9ca3af', lineHeight: 1.6 }}>
+                Are you sure you want to disconnect your YouTube account? You'll need to reconnect to sync playlists again.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              padding: '16px 24px',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <button
+                onClick={() => setShowDisconnectModal(false)}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#374151',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDisconnect}
+                style={{
+                  padding: '12px 24px',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
