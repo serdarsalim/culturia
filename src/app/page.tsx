@@ -695,7 +695,7 @@ export default function Home() {
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         flexShrink: 0,
         overflowY: 'auto',
-        backgroundColor: '#f3f4f6',
+        backgroundColor: '#ffffff',
         color: '#000000'
       }}>
         {selectedCountry && !showSubmissionForm ? (
@@ -1036,9 +1036,10 @@ export default function Home() {
               )}
 
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : '1fr',
-                gap: isMobile ? '10px' : '8px'
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? '10px' : '12px',
+                alignItems: 'center'
               }}>
                 {VISIBLE_CATEGORIES.map((key) => {
                   const icon = CATEGORY_ICON_MAP[key];
@@ -1051,23 +1052,35 @@ export default function Home() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '12px',
-                      padding: '12px 16px',
-                      borderRadius: '14px',
-                      border: isSelected ? '2px solid #f97316' : '1px solid rgba(145, 152, 171, 0.3)',
+                      padding: '14px 24px',
+                      borderRadius: '6px',
+                      border: isSelected ? '2px solid #f97316' : '2px solid transparent',
                       background: isSelected
-                        ? 'linear-gradient(135deg, #fff7ed, #ffe4d1)'
-                        : 'linear-gradient(135deg, #ffffff, #f8fafc)',
+                        ? 'linear-gradient(135deg, #f97316, #fb923c)'
+                        : '#f3f4f6',
                       cursor: 'pointer',
-                      textAlign: 'left',
-                      boxShadow: '0 8px 18px rgba(15, 23, 42, 0.08)',
-                      transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                      textAlign: 'center',
+                      boxShadow: isSelected ? '0 4px 14px rgba(249, 115, 22, 0.25)' : 'none',
+                      transition: 'all 0.2s ease',
+                      width: isMobile ? '100%' : '200px'
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 22px rgba(15, 23, 42, 0.12)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 18px rgba(15, 23, 42, 0.08)'; }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.background = '#e5e7eb';
+                        e.currentTarget.style.borderColor = '#d1d5db';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.background = '#f3f4f6';
+                        e.currentTarget.style.borderColor = 'transparent';
+                      }
+                    }}
                   >
                     <span style={{ fontSize: '20px' }}>{icon}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{label}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: isSelected ? '#ffffff' : '#0f172a' }}>{label}</span>
                   </button>
                 )})}
               </div>
@@ -1075,27 +1088,18 @@ export default function Home() {
 
             {/* Footer - Subtitle and Links */}
             <div style={{ marginTop: 'auto', paddingTop: '24px', paddingBottom: isMobile ? '32px' : '60px' }}>
-              <p style={{
-                fontSize: isMobile ? '13px' : '13px',
-                color: '#4b5563',
-                marginBottom: '8px',
-                lineHeight: '1.5',
-                textAlign: isMobile ? 'center' : 'left'
-              }}>
-                Discover authentic cultural content from around the world
-              </p>
               {user && (
                 <div style={{
                   fontSize: '11px',
                   color: '#6b7280',
-                  textAlign: isMobile ? 'center' : 'left',
+                  textAlign: 'center',
                   marginTop: '-4px',
                   marginBottom: '8px',
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px',
                   whiteSpace: 'nowrap',
-                  justifyContent: isMobile ? 'center' : 'flex-start',
                   width: '100%'
                 }}>
                   <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '10px', color: '#94a3b8' }}>
@@ -1106,7 +1110,31 @@ export default function Home() {
                   </span>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', justifyContent: isMobile ? 'center' : 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
+
+              {/* List View Toggle - Centered and above other links */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                <button
+                  onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
+                  style={{
+                    color: '#6b7280',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontSize: '13px',
+                    fontWeight: 500
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
+                >
+                  {viewMode === 'map' ? '📋 List View' : '🗺️ Map View'}
+                </button>
+              </div>
+
+              {/* Terms/Privacy/About - Centered */}
+              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                 <a
                   href="/terms"
                   style={{
@@ -1145,24 +1173,6 @@ export default function Home() {
                 >
                   About
                 </a>
-                <span style={{ color: '#d1d5db' }}>|</span>
-                <button
-                  onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
-                  style={{
-                    color: '#6b7280',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s',
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    padding: 0,
-                    fontSize: '12px'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
-                >
-                  {viewMode === 'map' ? '📋 List View' : '🗺️ Map View'}
-                </button>
               </div>
             </div>
           </div>
@@ -1293,7 +1303,7 @@ export default function Home() {
         >
           <div
             style={{
-              maxWidth: '720px',
+              maxWidth: '900px',
               width: '100%',
               background: 'radial-gradient(circle at top, #0f172a 0%, #020617 80%)',
               color: '#f8fafc',
@@ -1325,25 +1335,21 @@ export default function Home() {
             >
               ✕
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '28px' }}>🌍</span>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 700 }}>CULTURIA - Discover the World Through Authentic Voices</h2>
-                <p style={{ margin: '6px 0 0', color: '#94a3b8' }}>Experience real culture, in real languages, from real people.</p>
-              </div>
+            <div style={{ marginBottom: '16px' }}>
+              <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 700 }}>Discover The World Cultures</h2>
             </div>
             <p style={{ lineHeight: 1.6, color: '#e2e8f0' }}>
-              Most content online is translated, dubbed, or made for tourists. CULTURIA is different. We show you what it's actually like to live somewhere—through videos created by locals, in their native language, speaking authentically.
+              It is incredibly difficult to find good content for every country around the world. Culturia is here to help you learn the world without excessive YouTube searches. We show you what it is actually like in every part of the world. We also want you to hear every language from every country through videos created by locals, in their native language, speaking authentically.
             </p>
 
             <div style={{ marginTop: '24px' }}>
               <h3 style={{ fontSize: '16px', letterSpacing: '0.2em', color: '#f97316', marginBottom: '12px' }}>WHY THESE 4 CATEGORIES?</h3>
               <div style={{ display: 'grid', gap: '16px' }}>
                 {[
-                  { icon: '🎤', title: 'Talks', body: 'Listen to real people discuss ideas, share stories, give speeches, and have conversations. This is where you hear how people think and communicate.' },
+                  { icon: '🎤', title: 'Talks', body: 'Listen to people talking in their native language—discussing ideas, sharing stories, giving speeches, and having conversations.' },
                   { icon: '🎵', title: 'Music', body: 'Every culture expresses itself through music. From traditional folk songs to modern hits, experience the sounds that define a place.' },
-                  { icon: '😄', title: 'Comedy', body: 'Humor reveals what a culture finds funny, clever, or absurd. It’s cultural insight wrapped in entertainment.' },
-                  { icon: '📹', title: 'Daily Life', body: 'Experience authentic everyday moments—market scenes, local customs, daily routines, and cultural practices that reveal how people truly live.' },
+                  { icon: '😄', title: 'Comedy', body: 'Humor reveals what a culture finds funny, clever, or absurd. It is cultural insight wrapped in entertainment.' },
+                  { icon: '📹', title: 'Daily Life', body: 'Experience authentic everyday moments—food, market scenes, local customs, daily routines, cultural practices, and nature.' },
                 ].map(({ icon, title, body }) => (
                   <div key={title} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                     <span style={{ fontSize: '24px' }}>{icon}</span>
@@ -1359,13 +1365,7 @@ export default function Home() {
             <div style={{ marginTop: '24px', padding: '20px', borderRadius: '18px', background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
               <h3 style={{ margin: 0, color: '#fb923c', fontSize: '14px', letterSpacing: '0.15em' }}>OUR MISSION</h3>
               <p style={{ marginTop: '8px', lineHeight: 1.6, color: '#f8fafc' }}>
-                No translations. No tourist content. Just authentic cultural moments, captured in the source language, showing you what it really means to be from somewhere.
-              </p>
-            </div>
-
-            <div style={{ marginTop: '24px', padding: '16px', borderRadius: '18px', background: '#0f172a', border: '1px solid rgba(248, 250, 252, 0.06)' }}>
-              <p style={{ margin: 0, lineHeight: 1.6 }}>
-                Click any country. Pick a category. Immerse yourself. <span style={{ color: '#38bdf8', fontWeight: 600 }}>Let authentic voices guide you.</span>
+                Discover the world through curated Content and immerse yourself in world cultures and languages.
               </p>
             </div>
           </div>
