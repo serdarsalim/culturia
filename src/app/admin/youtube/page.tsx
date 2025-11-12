@@ -419,7 +419,7 @@ export default function YouTubePage() {
                             if (!syncing) e.currentTarget.style.backgroundColor = '#3b82f6';
                           }}
                         >
-                          Sync Country
+                          Sync
                         </button>
                         <span style={{
                           fontSize: '20px',
