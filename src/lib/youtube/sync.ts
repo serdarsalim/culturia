@@ -1,5 +1,5 @@
 import { YouTubeClient } from './client';
-import { supabase } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { getCountryName, getCountryFlag } from '@/lib/countries';
 import { CATEGORY_LABELS, type VideoCategory } from '@/types';
 
@@ -46,7 +46,7 @@ async function fetchVideosGrouped(
   countryCode?: string,
   category?: VideoCategory
 ): Promise<PlaylistInfo[]> {
-  let query = supabase
+  let query = supabaseAdmin
     .from('video_submissions')
     .select('country_code, category, youtube_video_id')
     .eq('status', 'approved')
@@ -109,7 +109,7 @@ async function syncPlaylist(
 
     // Check if we have this playlist cached in database
     console.log('Checking cache for existing playlist...');
-    const { data: cachedPlaylist } = await supabase
+    const { data: cachedPlaylist } = await supabaseAdmin
       .from('youtube_playlists')
       .select('youtube_playlist_id')
       .eq('country_code', country_code)
@@ -131,7 +131,7 @@ async function syncPlaylist(
       } catch (error: any) {
         // Cached playlist doesn't exist anymore, remove from cache and recreate
         console.log(`Cached playlist ${playlistId} not found on YouTube, removing from cache`);
-        await supabase
+        await supabaseAdmin
           .from('youtube_playlists')
           .delete()
           .eq('country_code', country_code)
@@ -143,7 +143,7 @@ async function syncPlaylist(
         wasCreated = true;
 
         // Cache it
-        await supabase.from('youtube_playlists').insert({
+        await supabaseAdmin.from('youtube_playlists').insert({
           country_code,
           category,
           youtube_playlist_id: playlistId,
@@ -161,7 +161,7 @@ async function syncPlaylist(
         playlistId = existingPlaylistId;
 
         // Cache it for future use
-        await supabase.from('youtube_playlists').insert({
+        await supabaseAdmin.from('youtube_playlists').insert({
           country_code,
           category,
           youtube_playlist_id: playlistId,
@@ -175,7 +175,7 @@ async function syncPlaylist(
         wasCreated = true;
 
         // Cache it
-        await supabase.from('youtube_playlists').insert({
+        await supabaseAdmin.from('youtube_playlists').insert({
           country_code,
           category,
           youtube_playlist_id: playlistId,
@@ -190,7 +190,7 @@ async function syncPlaylist(
     const videosAdded = await youtube.addVideosToPlaylist(playlistId, videoIds);
 
     // Update cache timestamp
-    await supabase
+    await supabaseAdmin
       .from('youtube_playlists')
       .update({ updated_at: new Date().toISOString() })
       .eq('country_code', country_code)
@@ -242,7 +242,7 @@ export async function syncAll(userId: string): Promise<SyncResult> {
   }
 
   // Log sync to database
-  await supabase.from('youtube_sync_logs').insert({
+  await supabaseAdmin.from('youtube_sync_logs').insert({
     sync_type: 'all',
     videos_synced: videosAdded,
     playlists_created: playlistsCreated,
@@ -290,7 +290,7 @@ export async function syncCountry(userId: string, countryCode: string): Promise<
   }
 
   // Log sync to database
-  await supabase.from('youtube_sync_logs').insert({
+  await supabaseAdmin.from('youtube_sync_logs').insert({
     sync_type: 'country',
     country_code: countryCode,
     videos_synced: videosAdded,
@@ -343,7 +343,7 @@ export async function syncCategory(
   }
 
   // Log sync to database
-  await supabase.from('youtube_sync_logs').insert({
+  await supabaseAdmin.from('youtube_sync_logs').insert({
     sync_type: 'category',
     country_code: countryCode,
     category,
