@@ -1,5 +1,5 @@
 import { google, youtube_v3 } from 'googleapis';
-import { supabase } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 export interface YouTubeTokens {
   access_token: string;
@@ -71,7 +71,7 @@ export class YouTubeClient {
    */
   async initialize(userId: string): Promise<void> {
     // Fetch tokens from database
-    const { data: tokenData, error } = await supabase
+    const { data: tokenData, error } = await supabaseAdmin
       .from('youtube_tokens')
       .select('*')
       .eq('user_id', userId)
@@ -96,7 +96,7 @@ export class YouTubeClient {
       }
 
       // Update database with new token
-      await supabase
+      await supabaseAdmin
         .from('youtube_tokens')
         .update({
           access_token: credentials.access_token,
