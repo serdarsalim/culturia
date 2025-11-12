@@ -1035,48 +1035,6 @@ export default function Home() {
                 </button>
               )}
 
-              {/* View Toggle Button */}
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                marginBottom: '8px'
-              }}>
-                <button
-                  onClick={() => setViewMode('map')}
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    backgroundColor: viewMode === 'map' ? '#f97316' : '#374151',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  🗺️ Map
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    backgroundColor: viewMode === 'list' ? '#f97316' : '#374151',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  📋 List
-                </button>
-              </div>
-
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : '1fr',
@@ -1148,7 +1106,7 @@ export default function Home() {
                   </span>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', justifyContent: isMobile ? 'center' : 'flex-start', alignItems: 'center', flexWrap: 'wrap' }}>
                 <a
                   href="/terms"
                   style={{
@@ -1187,6 +1145,24 @@ export default function Home() {
                 >
                   About
                 </a>
+                <span style={{ color: '#d1d5db' }}>|</span>
+                <button
+                  onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
+                  style={{
+                    color: '#6b7280',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontSize: '12px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#000000'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
+                >
+                  {viewMode === 'map' ? '📋 List View' : '🗺️ Map View'}
+                </button>
               </div>
             </div>
           </div>
