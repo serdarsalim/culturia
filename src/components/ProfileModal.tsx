@@ -49,7 +49,6 @@ export default function ProfileModal({
   const [profileLoading, setProfileLoading] = useState(false);
   const [usernameError, setUsernameError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(!!initialProfile);
   const [initialUsername, setInitialUsername] = useState(initialProfile?.username || '');
   const [editingSubmission, setEditingSubmission] = useState<VideoSubmission | null>(null);
@@ -59,6 +58,9 @@ export default function ProfileModal({
   );
   const [initialIsPrivate, setInitialIsPrivate] = useState(initialProfile?.is_private ?? false);
   const [updatingSubmissionId, setUpdatingSubmissionId] = useState<string | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSaveState, setProfileSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [profileDirty, setProfileDirty] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -203,51 +205,65 @@ export default function ProfileModal({
     }
   }
 
-  // Autosave profile with debounce
-  async function autoSaveProfile() {
-    setUsernameError('');
+  function hasProfileChanges() {
+    return (
+      username !== initialUsername ||
+      displayName !== initialDisplayName ||
+      isPrivate !== initialIsPrivate
+    );
+  }
 
-    // Don't save if nothing has changed
-    if (username === initialUsername && displayName === initialDisplayName && isPrivate === initialIsPrivate) {
+  useEffect(() => {
+    if (!profileLoaded) return;
+    setProfileDirty(hasProfileChanges());
+    if (profileSaveState === 'saved' && hasProfileChanges()) {
+      setProfileSaveState('idle');
+    }
+  }, [username, displayName, isPrivate, profileLoaded]);
+
+  async function handleSaveProfile() {
+    if (!profileLoaded || profileSaving || !hasProfileChanges()) {
       return;
     }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    setUsernameError('');
+    setProfileSaveState('idle');
 
-      // Validate username format
+    try {
+      setProfileSaving(true);
+      setProfileSaveState('saving');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not signed in');
+
       if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
         setUsernameError('Username can only contain letters, numbers, and underscores');
-        return;
+        throw new Error('validation');
       }
 
       if (username && username.length < 3) {
         setUsernameError('Username must be at least 3 characters');
-        return;
+        throw new Error('validation');
       }
 
       if (isPrivate === null) return;
 
       const { error } = await supabase
         .from('user_profiles')
-        .upsert({
-          id: user.id,
+        .update({
           username: username || null,
           display_name: displayName || null,
           is_private: isPrivate,
-        });
+        })
+        .eq('id', user.id);
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') {
           setUsernameError('Username already taken');
-        } else {
-          throw error;
+          throw new Error('validation');
         }
-        return;
+        throw error;
       }
 
-      // Update initial values after successful save
       setInitialUsername(username);
       setInitialDisplayName(displayName);
       setInitialIsPrivate(isPrivate);
@@ -257,45 +273,44 @@ export default function ProfileModal({
         is_private: isPrivate,
       });
 
-      // Success toast
-      setToastMessage({
-        title: 'Saved',
-        description: 'Profile updated',
-        type: 'success'
-      });
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
+      setProfileDirty(false);
+      setProfileSaveState('saved');
+      setTimeout(() => setProfileSaveState('idle'), 2000);
     } catch (error) {
-      console.error('Error saving profile:', error);
-      setToastMessage({
-        title: 'Save Failed',
-        description: 'Please try again',
-        type: 'error'
-      });
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      if ((error as Error).message === 'validation') {
+        setProfileSaveState('idle');
+      } else {
+        console.error('Error saving profile:', error);
+        setProfileSaveState('error');
+        setToastMessage({
+          title: 'Save Failed',
+          description: 'Please try again',
+          type: 'error'
+        });
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      }
+    } finally {
+      setProfileSaving(false);
     }
   }
 
-  // Debounced autosave on field changes (only after profile is loaded)
-  useEffect(() => {
-    // Don't autosave until profile data has been loaded
-    if (!profileLoaded) return;
+  function handleDisplayNameChange(value: string) {
+    setDisplayName(value);
+  }
 
-    if (saveTimeout) {
-      clearTimeout(saveTimeout);
-    }
+  function handleUsernameChange(value: string) {
+    setUsername(value);
+    setUsernameError('');
+  }
 
-    const timeout = setTimeout(() => {
-      autoSaveProfile();
-    }, 1000); // Save 1 second after user stops typing
-
-    setSaveTimeout(timeout);
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [username, displayName, isPrivate]);
+  function renderProfileStatus() {
+    if (profileSaveState === 'saving') return 'Saving…';
+    if (profileSaveState === 'saved') return 'Saved';
+    if (profileSaveState === 'error') return 'Save failed';
+    if (profileDirty) return 'Unsaved changes';
+    return null;
+  }
 
   async function handleDeleteSubmission(id: string) {
     if (!confirm('Are you sure you want to delete this submission?')) return;
@@ -717,11 +732,15 @@ export default function ProfileModal({
             <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '20px' }}>
               {/* Profile Settings */}
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Profile Information</h3>
+                <div style={{
+                  marginBottom: isMobile ? '8px' : '12px'
+                }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>Profile Information</h3>
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '12px' : '18px', maxWidth: '100%' }}>
-                  {/* Display Name and Username - 2 column grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '8px' : '12px' }}>
+                  {/* Display Name, Username, and Save - 3 column grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '8px' : '12px', alignItems: 'start' }}>
                     {/* Display Name */}
                     <div>
                       <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
@@ -730,7 +749,7 @@ export default function ProfileModal({
                       <input
                         type="text"
                         value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
+                        onChange={(e) => handleDisplayNameChange(e.target.value)}
                         placeholder="Your full name"
                         maxLength={100}
                         style={{
@@ -744,9 +763,6 @@ export default function ProfileModal({
                           outline: 'none'
                         }}
                       />
-                      <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                        Your name
-                      </p>
                     </div>
 
                     {/* Username */}
@@ -757,10 +773,7 @@ export default function ProfileModal({
                       <input
                         type="text"
                         value={username}
-                        onChange={(e) => {
-                          setUsername(e.target.value);
-                          setUsernameError('');
-                        }}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
                         placeholder="your_username"
                         maxLength={30}
                         style={{
@@ -774,15 +787,58 @@ export default function ProfileModal({
                           outline: 'none'
                         }}
                       />
-                      {usernameError ? (
+                      {usernameError && (
                         <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
                           {usernameError}
                         </p>
-                      ) : (
-                        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                          Min 3 chars
-                        </p>
                       )}
+                    </div>
+
+                    {/* Save Button */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      paddingTop: isMobile ? '0' : '27px',
+                      paddingLeft: isMobile ? '0' : '20px',
+                      paddingRight: isMobile ? '0' : '20px',
+                      marginBottom: isMobile ? '12px' : '0'
+                    }}>
+                      <div style={{ width: '100%' }}>
+                        <button
+                          type="button"
+                          onClick={handleSaveProfile}
+                          disabled={!profileDirty || profileSaving}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            backgroundColor: (!profileDirty || profileSaving) ? '#e5e7eb' : '#0f172a',
+                            color: (!profileDirty || profileSaving) ? '#94a3b8' : '#ffffff',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: (!profileDirty || profileSaving) ? 'default' : 'pointer',
+                            transition: 'background-color 0.2s',
+                            height: '42px'
+                          }}
+                        >
+                          {profileSaving ? 'Saving…' : 'Save Profile'}
+                        </button>
+                        {renderProfileStatus() && (
+                          <p style={{
+                            fontSize: '12px',
+                            color: profileSaveState === 'error'
+                              ? '#b91c1c'
+                              : profileSaveState === 'saved'
+                                ? '#15803d'
+                                : '#6b7280',
+                            marginTop: '4px',
+                            textAlign: 'center'
+                          }}>
+                            {renderProfileStatus()}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                   </div>
@@ -792,7 +848,7 @@ export default function ProfileModal({
               {/* Map Visibility */}
               <div>
                 <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: isMobile ? '2px' : '4px' }}>Map Visibility</h3>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '6px' : '8px' }}>Choose what the map highlights. You can select multiple.</p>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: isMobile ? '6px' : '8px' }}>Choose what the map highlights.</p>
                 <div style={{
                   display: isMobile ? 'flex' : 'grid',
                   flexDirection: isMobile ? 'column' : undefined,
