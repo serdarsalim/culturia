@@ -70,12 +70,15 @@ interface WorldMapProps {
 export default function WorldMap({ onCountryClick, selectedCountry, onBackgroundClick, countriesWithVideos }: WorldMapProps) {
   const [tooltip, setTooltip] = useState<{ name: string; x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [center, setCenter] = useState<[number, number]>([0, 20]);
+  const [center, setCenter] = useState<[number, number]>([25, 10]);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // Update center based on screen size
+      setCenter(mobile ? [25, 10] : [20, 10]);
     };
 
     handleResize();
@@ -129,10 +132,10 @@ export default function WorldMap({ onCountryClick, selectedCountry, onBackground
       )}
 
       <ComposableMap
-        projection="geoMercator"
+        projection="geoNaturalEarth1"
         projectionConfig={{
-          scale: 147,
-          center: [0, 20],
+          scale: 200,
+          center: isMobile ? [25, 10] : [20, 10],
         }}
         className="w-full h-full"
       >
