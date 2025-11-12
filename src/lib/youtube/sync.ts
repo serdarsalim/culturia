@@ -115,8 +115,33 @@ async function syncPlaylist(
     let wasCreated = false;
 
     if (cachedPlaylist) {
-      // Use cached playlist ID
-      playlistId = cachedPlaylist.youtube_playlist_id;
+      // Use cached playlist ID, but verify it still exists
+      try {
+        playlistId = cachedPlaylist.youtube_playlist_id;
+        // Try to get playlist videos to verify it exists
+        await youtube.getPlaylistVideoIds(playlistId);
+      } catch (error: any) {
+        // Cached playlist doesn't exist anymore, remove from cache and recreate
+        console.log(`Cached playlist ${playlistId} not found, removing from cache`);
+        await supabase
+          .from('youtube_playlists')
+          .delete()
+          .eq('country_code', country_code)
+          .eq('category', category);
+
+        // Create new playlist
+        playlistId = await youtube.createPlaylist(playlistName, playlistDescription);
+        wasCreated = true;
+
+        // Cache it
+        await supabase.from('youtube_playlists').insert({
+          country_code,
+          category,
+          youtube_playlist_id: playlistId,
+          playlist_name: playlistName,
+          playlist_url: `https://www.youtube.com/playlist?list=${playlistId}`,
+        });
+      }
     } else {
       // Search for playlist on YouTube
       const existingPlaylistId = await youtube.searchPlaylist(playlistName);
