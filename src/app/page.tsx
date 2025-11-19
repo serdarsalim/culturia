@@ -1301,6 +1301,7 @@ export default function Home() {
           onChangeCategory={handleChangeCategoryInPlayer}
           playlist={getCurrentPlaylist()}
           onSelectVideo={handleSelectVideoFromPlaylist}
+          selectedCategoryFilter={selectedCategoryFilter}
         />
       )}
 

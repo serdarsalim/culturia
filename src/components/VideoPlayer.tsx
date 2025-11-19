@@ -17,9 +17,10 @@ interface VideoPlayerProps {
   onChangeCategory?: (category: VideoCategory) => void;
   playlist?: VideoSubmission[];
   onSelectVideo?: (video: VideoSubmission) => void;
+  selectedCategoryFilter?: VideoCategory | null;
 }
 
-export default function VideoPlayer({ video, category, onClose, onNext, onSubmitVideo, categoryCounts, onChangeCategory, playlist, onSelectVideo }: VideoPlayerProps) {
+export default function VideoPlayer({ video, category, onClose, onNext, onSubmitVideo, categoryCounts, onChangeCategory, playlist, onSelectVideo, selectedCategoryFilter }: VideoPlayerProps) {
   const CATEGORY_EMOJI: Record<VideoCategory, string> = {
     inspiration: '💡',
     music: '🎵',
@@ -43,7 +44,13 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<'playlist' | 'comments'>('playlist');
   const [commentCount, setCommentCount] = useState(0);
-  const [expandedCategories, setExpandedCategories] = useState<Set<VideoCategory>>(new Set(VISIBLE_CATEGORIES));
+  const [expandedCategories, setExpandedCategories] = useState<Set<VideoCategory>>(() => {
+    // If there's a category filter, only expand that category
+    // Otherwise, expand all categories
+    return selectedCategoryFilter
+      ? new Set([selectedCategoryFilter])
+      : new Set(VISIBLE_CATEGORIES);
+  });
 
   // Toggle category expansion
   const toggleCategory = (category: VideoCategory) => {
@@ -462,7 +469,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                       <div style={{
                         fontSize: '11px',
                         fontWeight: 700,
-                        color: '#9ca3af',
+                        color: '#ffffff',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                         display: 'flex',
@@ -470,14 +477,13 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                         gap: '6px'
                       }}>
                         <span style={{
-                          fontSize: '10px',
+                          fontSize: '12px',
                           transition: 'transform 0.2s',
-                          transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                          display: 'inline-block'
-                        }}>▶</span>
+                          color: '#9ca3af'
+                        }}>{isExpanded ? '▾' : '▸'}</span>
                         <span>{CATEGORY_EMOJI[group.category]}</span>
                         <span>{CATEGORY_LABELS[group.category]}</span>
-                        <span style={{ color: '#6b7280' }}>({group.videos.length})</span>
+                        <span style={{ color: '#9ca3af' }}>({group.videos.length})</span>
                       </div>
                     </div>
 
@@ -524,7 +530,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                             style={{
                               fontSize: '13px',
                               fontWeight: isCurrentVideo ? 600 : 400,
-                              color: isCurrentVideo ? '#3b82f6' : '#ffffff',
+                              color: isCurrentVideo ? '#3b82f6' : '#a1a1aa',
                               lineHeight: '1.4',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
@@ -783,7 +789,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
               </div>
               {categoryCounts && onChangeCategory && (
                 <div style={{
-                  display: 'flex',
+                  display: 'none',
                   gap: '6px',
                   justifyContent: 'center',
                   flex: 1,
@@ -942,7 +948,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
             {/* Center: Category pills (desktop only) */}
             {categoryCounts && onChangeCategory && (
               <div style={{
-                display: 'flex',
+                display: 'none',
                 gap: '8px',
                 justifyContent: 'center',
                 flex: 1
@@ -1162,7 +1168,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                       <div style={{
                         fontSize: '11px',
                         fontWeight: 700,
-                        color: '#9ca3af',
+                        color: '#ffffff',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                         display: 'flex',
@@ -1170,14 +1176,13 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                         gap: '6px'
                       }}>
                         <span style={{
-                          fontSize: '10px',
+                          fontSize: '12px',
                           transition: 'transform 0.2s',
-                          transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                          display: 'inline-block'
-                        }}>▶</span>
+                          color: '#9ca3af'
+                        }}>{isExpanded ? '▾' : '▸'}</span>
                         <span>{CATEGORY_EMOJI[group.category]}</span>
                         <span>{CATEGORY_LABELS[group.category]}</span>
-                        <span style={{ color: '#6b7280' }}>({group.videos.length})</span>
+                        <span style={{ color: '#9ca3af' }}>({group.videos.length})</span>
                       </div>
                     </div>
 
@@ -1212,7 +1217,7 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
                             style={{
                               fontSize: '13px',
                               fontWeight: isCurrentVideo ? 600 : 400,
-                              color: isCurrentVideo ? '#3b82f6' : '#ffffff',
+                              color: isCurrentVideo ? '#3b82f6' : '#a1a1aa',
                               lineHeight: '1.4',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
