@@ -773,67 +773,24 @@ export default function VideoPlayer({ video, category, onClose, onNext, onSubmit
           <div style={{
             marginTop: '12px',
             paddingLeft: '16px',
-            paddingRight: '16px'
+            paddingRight: '16px',
+            paddingBottom: '16px'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: '10px'
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
+                gap: '8px',
                 flexShrink: 0
               }}>
                 <span style={{ fontSize: '28px' }}>{getCountryFlag(video.country_code)}</span>
+                <span style={{ fontWeight: 600, fontSize: '16px', color: '#ffffff' }}>{getCountryName(video.country_code)}</span>
               </div>
-              {categoryCounts && onChangeCategory && (
-                <div style={{
-                  display: 'none',
-                  gap: '6px',
-                  justifyContent: 'center',
-                  flex: 1,
-                  overflowX: 'auto',
-                  paddingBottom: '2px',
-                  minWidth: 0
-                }}>
-                  {VISIBLE_CATEGORIES.map((cat) => {
-                    const count = categoryCounts[cat] || 0;
-                    const active = cat === category;
-                    const disabled = count === 0;
-                    const label = CATEGORY_LABELS[cat];
-                    const emoji = CATEGORY_EMOJI[cat];
-                    return (
-                      <button
-                        key={cat}
-                        disabled={disabled}
-                        onClick={() => !disabled && !active && onChangeCategory(cat)}
-                        style={{
-                          whiteSpace: 'nowrap',
-                          padding: '5px 10px',
-                          borderRadius: '9999px',
-                          border: '1px solid ' + (active ? '#3b82f6' : '#334155'),
-                          background: active ? '#3b82f6' : '#111827',
-                          color: disabled ? '#6b7280' : '#ffffff',
-                          opacity: disabled ? 0.6 : 1,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          cursor: disabled ? 'not-allowed' : 'pointer'
-                        }}
-                        aria-pressed={active}
-                        aria-label={label}
-                        title={label}
-                      >
-                        <span aria-hidden>{emoji}</span>
-                        {active && <span>{label}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
